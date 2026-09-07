@@ -385,12 +385,14 @@ async function main(): Promise<void> {
   emit({ type: "status", text: start.game ? "Sitting the game…" : "Casting the table…" });
 
   const spec = start.game ? loadGame(start.game) : null;
+  // Empty for a golden game, whose scene comes from the frozen spec instead.
+  const source = spec ? "" : start.scenario!.trim();
   const cast = spec
     ? castFromSpec(spec)
     : asCast(
         readJsonObject(
           await infer(
-            "You turn an everyday situation into a small table conversation. Pick 3 to 5 named people who would actually be in the room. First names only. Each person wants something specific and human. The premise is two or three sentences of scene, not a lecture. Also set kind, question, and actions. kind is decision if they must resolve something (take the offer, sign, stay or go), crowd if the tension is whether people show up to a scarce thing (office hours with few chairs, a packed party — someone might skip because it will be worse if everyone goes), talk if they are mostly talking it through. question is one sentence that must be resolved, like 'Do they take the offer?' or 'Do you go to office hours?'. actions are 2 to 4 short labels people can actually choose, like accept/reject, go/stay, sign now/wait. No game theory. No payoff numbers.",
+            "You turn a situation into a small table conversation. Stay inside the situation you are given. Do not move it to another setting, and do not add facts it does not contain.\n\nPeople: if the situation already says who is involved — named people, roles, sides, factions — seat exactly those and keep their identity in the name. Keep each name short, one or two words: Fire, not Leader of the Fire Guild. Invent people, with first names, only when the situation names none. Seat 3 to 5 of them, and give each one something specific and human they want.\n\nActions: if the situation already states the choices, use exactly those. Otherwise pick 2 to 4 short labels people can actually choose, like accept/reject, go/stay, sign now/wait.\n\ntitle names this situation, in its own terms. premise is two or three sentences putting that same situation in a room — a scene, not a lecture, and not a new story.\n\nAlso set kind and question. kind is decision if they must resolve something (take the offer, sign, stay or go), crowd if the tension is whether people show up to a scarce thing (office hours with few chairs, a packed party — someone might skip because it will be worse if everyone goes), talk if they are mostly talking it through. question is one sentence that must be resolved, like 'Do they take the offer?' or 'Do you go to office hours?'. No game theory. No payoff numbers.",
             start.scenario!,
             CAST_SCHEMA,
           ),
@@ -480,6 +482,9 @@ async function main(): Promise<void> {
 
     const last = round === ROUNDS;
     const cue = [
+      // The cast is only a reading of the situation. Agents see the original
+      // words too, so a loose paraphrase cannot quietly swap in another scene.
+      source && `The situation, as it was given:\n${source}`,
       cast.premise,
       `The question: ${cast.question}`,
       `This is round ${round} of ${ROUNDS}.`,
@@ -487,7 +492,9 @@ async function main(): Promise<void> {
       last
         ? `This is the last turn. State clearly what you will do. Use one of these in plain speech: ${cast.actions.join(", ")}.`
         : "Speak to the table, in character, about what you will actually do.",
-    ].join("\n\n");
+    ]
+      .filter(Boolean)
+      .join("\n\n");
 
     const pending = waitForRound(state, ids);
     sendMessage(cue, facilitator.getId());
