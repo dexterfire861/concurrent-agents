@@ -1,0 +1,100 @@
+# ADVERSARIAL. Structurally valid, schema-clean, and LYING.
+#
+# MUST BE REFUTED (both claims):
+#   claims[0] = {kind: archetype, value: prisoners_dilemma}
+#   claims[1] = {kind: dominant_strategy, role: all, action: D, strict: true}
+# WITNESS MUST NAME the profitable deviation:
+#   against an opponent playing D, COOPERATING pays S = 1 while DEFECTING pays
+#   P = 0. Defection is beaten in that column, so it is not dominant — strictly
+#   or weakly — and the game is not a prisoner's dilemma.
+#
+# Numbers: R=3, S=1, T=5, P=0.  The single swap that breaks it is S > P.
+#
+#              C          D
+#        C   (3, 3)    (1, 5)
+#        D   (5, 1)    (0, 0)
+#
+# WHAT PASSES:
+#   1. The table is complete: 4 cells for 2 actions x 2 roles.
+#   2. It is symmetric, as a symmetric_2x2 must be.
+#   3. T > R:  5 > 3.  Defection does beat cooperation against a cooperator,
+#      which is the half of the PD condition that holds. A checker that tests
+#      only the top row confirms a false claim.
+#
+# WHAT FAILS:
+#   4. PD requires T > R > P > S:  5 > 3 > 0 > 1 is FALSE, because P = 0 < S = 1.
+#   5. Dominance, column by column:
+#        against C:  D pays 5  >  C pays 3     D better by 2
+#        against D:  D pays 0  <  C pays 1     C better by 1   <-- THE WITNESS
+#      No action is best in both columns, so neither role has a dominant
+#      strategy, strict or weak. REFUTED.
+#   6. Equilibria. The game is actually CHICKEN (T > R > S > P: 5 > 3 > 1 > 0).
+#      Its pure Nash equilibria are the two lopsided profiles (C,D) and (D,C),
+#      not the unique (D,D) a prisoner's dilemma has. That is a second,
+#      independent witness: an evaluator can report either.
+#      archetypeDetected should come back `chicken`, not `prisoners_dilemma`.
+#
+# EXPECTED WITNESS SHAPE (content, not format):
+#   {role: <either>, opponentAction: D, claimedBest: D, actualBest: C,
+#    claimedPayoff: 0, actualPayoff: 1, gain: 1}
+# EXPECTED `errors`: none required. The spec is well-formed; only its claims
+#   are false.
+
+schemaVersion: "1"
+family: normal_form
+
+metadata:
+  id: adversarial-prisoners-dilemma-no-dominance
+  title: Prisoner's dilemma where defection is not dominant
+  sourceDescription: >
+    Two suspects are questioned separately. Talking is tempting, but if both
+    talk the case collapses on both of them and they each end up with nothing.
+  tags: [adversarial, normal_form, prisoners_dilemma, dominance, false_claim]
+
+seed: 20260906
+
+population:
+  size: 2
+  roles:
+    - id: row
+      share: 0.5
+      persona: "You are the first suspect."
+    - id: column
+      share: 0.5
+      persona: "You are the second suspect."
+
+actions:
+  kind: discrete
+  actions: [C, D]
+
+payoff:
+  kind: symmetric_2x2
+  R: 3
+  S: 1
+  T: 5
+  P: 0
+
+protocol:
+  regime: simultaneous
+  repetition:
+    rounds: 1
+    termination: fixed
+
+information:
+  observes: [own_action, own_payoff, full_profile]
+
+communication:
+  kind: none
+
+sweep:
+  axes: []
+  replicates: 1
+  maxCells: 1
+
+claims:
+  - kind: archetype
+    value: prisoners_dilemma
+  - kind: dominant_strategy
+    role: all
+    action: D
+    strict: true

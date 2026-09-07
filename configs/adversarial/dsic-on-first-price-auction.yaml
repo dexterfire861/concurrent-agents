@@ -1,0 +1,120 @@
+# ADVERSARIAL. Structurally valid, schema-clean, and LYING.
+#
+# MUST BE REFUTED:  claims[0] = {kind: dsic}
+# WITNESS MUST NAME THE PROFITABLE MISREPORT. Plan section 6: "`dsic` claimed
+#   => brute-force every lie; refute with the profitable lie as the witness if
+#   one exists." Here is the lie, named exactly:
+#
+#     A bidder whose private value is 40, facing an opponent bid of 20,
+#     bids 30 instead of the truthful 40.
+#       truthful  b = 40: wins, PAYS ITS OWN BID 40, utility 40 - 40 =  0
+#       misreport b = 30: wins (30 > 20), pays 30,   utility 40 - 30 = 10
+#     Strict gain of 10. Truthful bidding is therefore not a dominant strategy.
+#
+# Compare configs/golden/second-price-auction.yaml, which is IDENTICAL except
+# for `rule.kind`. That one-word difference is the entire content of the
+# revelation principle for these two auctions, and it is exactly the kind of
+# thing a generator gets wrong.
+#
+# SETUP: 2 bidders, private values iid over {20, 40} with equal probability,
+# bid grid {0, 10, 20, 30, 40}, first-price rule, no reserve, ties to lowest id.
+#
+# WHAT PASSES:
+#   1. The bid grid covers the valuation range (max bid 40 >= max value 40), so
+#      the grid-coverage check of plan section 6 passes.
+#   2. Allocation is always feasible: one item, one winner.
+#   3. Transfers balance: the winner pays, the seller receives, nobody else moves.
+#   4. Tie-breaking is declared and seeded (lowest_id).
+#   5. `individually_rational` is genuinely TRUE here and is claimed alongside
+#      on purpose: truthful bidding never yields negative utility (you pay your
+#      own bid, which equals your value, so utility is 0 or positive). A
+#      validator that refutes BOTH claims is over-refuting; only `dsic` is false.
+#
+# WHAT FAILS:
+#   6. Under a first-price rule the price you pay is your own report, so
+#      truth-telling drives your surplus to exactly zero whenever you win:
+#        utility(truthful win) = v - v = 0.
+#      Any winning bid strictly below your value is strictly better. The
+#      equilibrium is to SHADE, never to be truthful, so
+#        equilibriumBid: shaded  (NOT truthful)
+#        dsicVerified:   false
+#      A single counterexample suffices to kill a dominance claim, and the one
+#      named at the top is complete: it fixes the opponent's bid at 20 and
+#      exhibits a strictly better report.
+#
+#   7. For completeness, the full brute force for v = 40 against opponent bid 20
+#      (bids on the declared grid):
+#        b = 0  -> lose,       utility 0
+#        b = 10 -> lose,       utility 0
+#        b = 20 -> tie, lowest_id decides; at best win at 20 -> utility 20
+#        b = 30 -> win, pay 30 -> utility 10
+#        b = 40 -> win, pay 40 -> utility 0     <- the truthful report
+#      Truthful is the WORST winning bid on the grid. Any of b = 20 or b = 30
+#      is a valid witness; b = 30 is the cleanest because it wins outright with
+#      no tie-breaking involved, which is why it is the one named above.
+#
+# EXPECTED WITNESS SHAPE (content, not format):
+#   {valuation: 40, truthfulBid: 40, profitableBid: 30, opponentBid: 20,
+#    truthfulUtility: 0, misreportUtility: 10, gain: 10}
+# EXPECTED VERDICTS: dsic REFUTED; individually_rational CONFIRMED.
+# EXPECTED `errors`: none required. Well-formed spec, one false claim.
+
+schemaVersion: "1"
+family: mechanism
+
+metadata:
+  id: adversarial-dsic-on-first-price-auction
+  title: First-price auction claiming truthfulness is dominant
+  sourceDescription: >
+    Two people bid for one item in sealed envelopes. The highest bidder wins
+    and pays what they offered.
+  tags: [adversarial, mechanism, auction, first_price, dsic, false_claim]
+
+seed: 20260906
+
+population:
+  size: 2
+  roles:
+    - id: bidder
+      share: 1.0
+      persona: "You want the item and know privately what it is worth to you."
+
+report:
+  kind: bid
+  space:
+    kind: discrete
+    actions: ["0", "10", "20", "30", "40"]
+
+valuation:
+  kind: private_value
+  dist:
+    kind: empirical
+    values: [20, 40]
+    weights: [0.5, 0.5]
+
+rule:
+  kind: first_price
+
+transfers: monetary
+tieBreak: lowest_id
+
+protocol:
+  regime: simultaneous
+  repetition:
+    rounds: 1
+    termination: fixed
+
+information:
+  observes: [own_action, own_payoff, own_type, mechanism_outcome]
+
+communication:
+  kind: none
+
+sweep:
+  axes: []
+  replicates: 1
+  maxCells: 1
+
+claims:
+  - kind: dsic
+  - kind: individually_rational

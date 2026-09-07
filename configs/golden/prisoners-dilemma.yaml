@@ -1,0 +1,126 @@
+# GOLDEN. Closed-form. Prisoner's dilemma, the canonical System-A fixture.
+#
+# CONVENTION (not pinned by the types — see configs/README.md): in a
+# `symmetric_2x2` payoff the FIRST label in `actions` is the cooperative move
+# and the SECOND is the defection, so R/S/T/P read off as:
+#   R = both cooperate, S = I cooperate & they defect,
+#   T = I defect & they cooperate, P = both defect.
+#
+# Numbers: R=3, S=0, T=5, P=1.
+#
+# DERIVATION -- all of it, by hand.
+#
+# The 2x2 table (row payoff, column payoff):
+#              C          D
+#        C   (3, 3)    (0, 5)
+#        D   (5, 0)    (1, 1)
+#
+# 1. Ordering. T > R > P > S  =>  5 > 3 > 1 > 0.  Holds.
+#
+# 2. Defection is STRICTLY dominant.
+#      against C:  D pays T=5  >  C pays R=3      (gain 2)
+#      against D:  D pays P=1  >  C pays S=0      (gain 1)
+#    Strict in both columns, so `dominant_strategy {all, D, strict: true}` holds.
+#
+# 3. Unique pure Nash = (D, D), payoffs (1, 1).
+#      (C,C): row deviates to D and gains 5-3 = 2   -> not Nash
+#      (C,D): row deviates to D and gains 1-0 = 1   -> not Nash
+#      (D,C): column deviates to D and gains 1-0    -> not Nash
+#      (D,D): row deviating to C loses 1-0 = 1      -> Nash
+#    So pureNash = [ {row: D, column: D} ], exactly one profile.
+#
+# 4. (D,D) is Pareto-dominated by (C,C): 3 > 1 for BOTH players, strictly.
+#    => claim `social_dilemma` CONFIRMED. This is the unambiguous Pareto
+#       reading; contrast with the congestion fixture, which is only
+#       welfare-inefficient (see configs/README.md, "Two readings of
+#       social_dilemma").
+#
+# 5. Pareto frontier. Welfare per cell: (C,C)=6, (C,D)=5, (D,C)=5, (D,D)=2.
+#    Pareto-efficient profiles = {(C,C), (C,D), (D,C)}.  (D,D) is dominated by
+#    (C,C) and is the only dominated cell.
+#
+# 6. Price of anarchy / stability. Optimal welfare 6 at (C,C); the unique Nash
+#    has welfare 2.  PoA = 6/2 = 3.  PoS = 6/2 = 3 (unique equilibrium).
+#
+# 7. Repeated-game guard (plan section 6): 2R > T + S  =>  6 > 5.  Holds, so
+#    alternating exploitation (average (T+S)/2 = 2.5) does NOT beat mutual
+#    cooperation (3). This really is the dilemma, not a turn-taking game.
+#    Minmax for each player = min over opponent action of own best reply
+#      = min( max(R,T), max(S,P) ) = min( max(3,5), max(0,1) ) = min(5, 1) = 1.
+#    Grim trigger sustains cooperation iff  delta >= (T-R)/(T-P) = 2/4 = 0.5.
+#    This fixture is ONE-SHOT (rounds: 1, fixed), so the stage answer stands.
+#
+# EXPECTED THEORY BLOCK
+#   family:            normal_form
+#   pureNash:          [{row: D, column: D}]                 (exactly 1)
+#   dominant:          {row: {action: D, strict: true},
+#                       column: {action: D, strict: true}}
+#   paretoFrontier:    3 profiles, and (D,D) is NOT among them
+#   priceOfAnarchy:    3
+#   priceOfStability:  3
+#   archetypeDetected: prisoners_dilemma
+#   repeated.minmax:   {row: 1, column: 1}
+#   repeated.cooperationSustainableAboveDiscount: 0.5
+# EXPECTED VERDICTS: all three claims CONFIRMED.
+# Tolerance: 1e-9 (all values are exact small rationals).
+
+schemaVersion: "1"
+family: normal_form
+
+metadata:
+  id: golden-prisoners-dilemma
+  title: Prisoner's dilemma
+  sourceDescription: >
+    Two people are questioned separately. Each can stay quiet or talk. Talking
+    is better for you whatever the other does, but if you both talk you both
+    end up worse off than if you had both stayed quiet.
+  tags: [golden, normal_form, prisoners_dilemma, dominance]
+
+seed: 20260906
+
+population:
+  size: 2
+  roles:
+    - id: row
+      share: 0.5
+      persona: "You are the first suspect. You have no way to talk to the other."
+    - id: column
+      share: 0.5
+      persona: "You are the second suspect. You have no way to talk to the other."
+
+actions:
+  kind: discrete
+  actions: [C, D]
+
+payoff:
+  kind: symmetric_2x2
+  R: 3
+  S: 0
+  T: 5
+  P: 1
+
+protocol:
+  regime: simultaneous
+  repetition:
+    rounds: 1
+    termination: fixed
+
+information:
+  observes: [own_action, own_payoff, full_profile]
+
+communication:
+  kind: none
+
+sweep:
+  axes: []
+  replicates: 1
+  maxCells: 1
+
+claims:
+  - kind: archetype
+    value: prisoners_dilemma
+  - kind: dominant_strategy
+    role: all
+    action: D
+    strict: true
+  - kind: social_dilemma

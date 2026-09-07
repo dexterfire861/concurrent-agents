@@ -1,0 +1,149 @@
+# GOLDEN. Closed-form. Rubinstein alternating offers. This fixture exists to
+# pin ONE formula exactly:
+#
+#     player 1's equilibrium share  =  (1 - d2) / (1 - d1 * d2)
+#
+# and to make the two benchmarks DISAGREE, because the plan says disagreement
+# between the axiomatic and strategic answers is informative, not a bug.
+#
+# SETUP. Surplus 100, disagreement (0, 0), both discount factors 0.25,
+# alpha proposes first, infinite horizon (no `deadline` field — see below).
+#
+# The discount factors are chosen so the answer lands EXACTLY on the 0.01
+# offer grid. With d1 = d2 = d the formula collapses to
+#     (1 - d) / (1 - d^2)  =  (1 - d) / ((1-d)(1+d))  =  1 / (1 + d)
+# and d = 0.25 gives 1 / 1.25 = 0.8 exactly. Nothing here is a rounded decimal.
+#
+# DERIVATION 1 -- RUBINSTEIN SHARE
+#   d1 = d2 = 0.25,  d1 * d2 = 0.0625
+#   alpha's share = (1 - d2) / (1 - d1*d2)
+#                 = (1 - 0.25) / (1 - 0.0625)
+#                 = 0.75 / 0.9375
+#                 = 0.8                                     (exactly 4/5)
+#   beta's share  = d2 * (1 - d1) / (1 - d1*d2)
+#                 = 0.25 * 0.75 / 0.9375
+#                 = 0.1875 / 0.9375
+#                 = 0.2                                     (exactly 1/5)
+#   Sum = 1.0.  Check.
+#   In units of the surplus:  alpha 80, beta 20.
+#
+#   Consistency check on the equilibrium itself. Let x be alpha's demand when
+#   alpha proposes and y be alpha's share when beta proposes. Stationary SPNE
+#   requires each responder to be exactly indifferent:
+#       beta accepts x iff   100 - x  >=  d2 * (100 - y)
+#       alpha accepts y iff  y        >=  d1 * x
+#   With equality at the equilibrium: 100 - x = 0.25 * (100 - y) and y = 0.25x.
+#       100 - x = 25 - 0.25y = 25 - 0.25*(0.25x) = 25 - 0.0625x
+#       100 - 25 = x - 0.0625x = 0.9375x
+#       75 = 0.9375x  =>  x = 80.  And y = 0.25 * 80 = 20.
+#   Matches the formula. alpha proposes 80/20 in round 1 and beta accepts
+#   immediately, so no surplus is burned on the equilibrium path.
+#
+# DERIVATION 2 -- NASH BARGAINING SOLUTION (the axiomatic benchmark)
+#   maximise (u1 - 0)(u2 - 0) subject to u1 + u2 = 100, u1, u2 >= 0.
+#   Substituting u2 = 100 - u1 gives u1(100 - u1), maximised at u1 = 50.
+#   => nashBargainingSolution = {alpha: 50, beta: 50}.
+#   Note the NBS ignores the discount factors entirely; that is exactly why it
+#   differs from the strategic answer here.
+#
+# DERIVATION 3 -- KALAI-SMORODINSKY
+#   Ideal point: each player's best feasible payoff given the other gets at
+#   least their disagreement value = (100, 100). Disagreement (0, 0).
+#   KS picks the point on the frontier where gains are proportional to the
+#   ideal gains: u1/100 = u2/100 with u1 + u2 = 100  =>  (50, 50).
+#   => kalaiSmorodinsky = {alpha: 50, beta: 50}. Same as NBS because the
+#      problem is symmetric.
+#
+# THE DISAGREEMENT BETWEEN BENCHMARKS
+#   fair-division answer:  50 / 50
+#   strategic answer:      80 / 20
+#   Both are correct answers to different questions. The 30-point gap is the
+#   first-mover advantage, which exists because delay is very costly (d = 0.25
+#   means waiting one round shrinks your slice to a quarter). Reporting only
+#   one of these would be a bug.
+#
+# VALIDATION preconditions (plan section 6) all hold:
+#   surplus 100 > 0;  disagreement (0,0) is strictly below every point on the
+#   frontier;  both discount factors are strictly inside (0, 1);  the fair
+#   split (50,50) is not equal to the walk-away point (0,0);  the grid 0.01
+#   divides the surplus evenly and represents 80 and 20 exactly.
+#
+# EXPECTED THEORY BLOCK
+#   family:                 bargaining
+#   rubinsteinShare:        {alpha: 80, beta: 20}
+#   nashBargainingSolution: {alpha: 50, beta: 50}
+#   disagreement:           {alpha: 0,  beta: 0}
+# (The Kalai-Smorodinsky derivation below is kept for the record even though
+#  BargainingTheory no longer carries a field for it. If one is added back, the
+#  expected value on this fixture is {alpha: 50, beta: 50}.)
+# EXPECTED VERDICTS: individually_rational CONFIRMED (both equilibrium shares,
+#   80 and 20, exceed the disagreement payoff of 0).
+# Tolerance: 1e-9. The shares are exact on the 0.01 grid, so this is not a
+# grid-approximation lower bound; if a future evaluator reports
+# method.equilibrium = "grid_approximation" here it must also report
+# gridResolution = 0.01.
+
+schemaVersion: "1"
+family: bargaining
+
+metadata:
+  id: golden-rubinstein-bargaining
+  title: Rubinstein alternating offers
+  sourceDescription: >
+    Two people split a hundred pounds by taking turns proposing. Every round
+    they fail to agree, the money is worth much less to both of them.
+  tags: [golden, bargaining, rubinstein, nash_bargaining, discounting]
+
+seed: 20260906
+
+population:
+  size: 2
+  roles:
+    - id: alpha
+      share: 0.5
+      persona: "You make the first offer. Waiting is expensive for you."
+    - id: beta
+      share: 0.5
+      persona: "You respond first and propose second. Waiting is expensive for you."
+
+surplus: 100
+grid: 0.01
+
+# NOTE the field is `offerProtocol`, not `protocol`. `Scenario = Envelope &
+# Family` would otherwise intersect it with `Envelope.protocol` and make this
+# arm unwritable. The envelope's own `protocol` block is below and means
+# something different: how the harness collects answers.
+offerProtocol:
+  kind: alternating_offer
+  proposerOrder: [alpha, beta]
+  # No `deadline`. That absence is load-bearing: the Rubinstein share is an
+  # INFINITE-HORIZON result. A deadline would replace it with a finite
+  # backward induction and a different number.
+
+protocol:
+  regime: simultaneous
+  repetition:
+    rounds: 1
+    termination: fixed
+
+disagreement:
+  alpha: 0
+  beta: 0
+
+discount:
+  alpha: 0.25
+  beta: 0.25
+
+information:
+  observes: [own_action, own_payoff, history]
+
+communication:
+  kind: none
+
+sweep:
+  axes: []
+  replicates: 1
+  maxCells: 1
+
+claims:
+  - kind: individually_rational

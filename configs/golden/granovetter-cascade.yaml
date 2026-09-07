@@ -1,0 +1,158 @@
+# GOLDEN. Closed-form. Granovetter threshold cascade with a NONTRIVIAL
+# INTERIOR TIPPING POINT. The adversarial twin
+# (configs/adversarial/cascade-only-trivial-fixed-points.yaml) is the same
+# model with the interior structure removed.
+#
+# SEMANTICS of `threshold_binary`, quoted from the FORMULA comment on
+# AggregatePayoff in src/spec/types.ts:
+#     payoff(act)     = benefit * [ statistic >= own threshold ]  -  cost
+#     payoff(not act) = outsideOption
+# With benefit=10, cost=1, outsideOption=0, acting is worth it exactly when the
+# statistic reaches your threshold: 10 - 1 = 9 > 0, and 0 - 1 = -1 < 0.
+#
+# The statistic is a COUNT of `act` and `includesSelf: true`, so a threshold is
+# "the total number of actors, me included, that has to act before I want in".
+#
+# POPULATION AND THRESHOLDS (N = 10)
+#   empirical distribution over threshold counts:
+#     value 0, weight 0.2  ->  2 agents, unconditional actors
+#     value 5, weight 0.3  ->  3 agents
+#     value 9, weight 0.5  ->  5 agents
+#   sorted threshold vector: [0, 0, 5, 5, 5, 9, 9, 9, 9, 9]
+#   All thresholds <= N = 10, so all are reachable (plan section 6).
+#
+# The theory below is computed from the population CDF implied by
+# (values, weights), which is exact — it does not depend on which agent drew
+# which threshold, which is the anonymity property this family is built on.
+#
+# DERIVATION
+#
+# Cascade / best-response map:  G(x) = #{ i : theta_i <= x }.
+#   G(0)=2  G(1)=2  G(2)=2  G(3)=2  G(4)=2
+#   G(5)=5  G(6)=5  G(7)=5  G(8)=5
+#   G(9)=10 G(10)=10
+#
+# Fixed points of G (G(x) = x):
+#   x=0:  G=2  != 0   no      x=1:  G=2  != 1   no
+#   x=2:  G=2  == 2   YES     x=3,4: G=2 != x   no
+#   x=5:  G=5  == 5   YES     x=6,7,8: G=5 != x no
+#   x=9:  G=10 != 9   no      x=10: G=10 == 10  YES
+#   => fixed points {2, 5, 10}.  NOTE 0 is NOT one: the two zero-threshold
+#      agents act unconditionally, so "nobody acts" is not self-consistent.
+#      That is what makes this cascade nonvacuous.
+#
+# CROSS-CHECK with the self-inclusion-corrected equilibrium condition, which is
+# the definition this repo actually uses (no profitable unilateral deviation,
+# recomputing the count with your own action in it):
+#   level x is an equilibrium iff
+#     (a) every actor is content:      x-th smallest threshold <= x
+#     (b) no non-actor wants in:  (x+1)-th smallest threshold >  x + 1
+#   x=0:  (b) fails, 1st smallest theta = 0 <= 1  -> someone wants in. NOT eq.
+#   x=2:  (a) theta_(2)=0 <= 2 ok.  (b) theta_(3)=5 > 3 ok.   EQUILIBRIUM
+#   x=3:  (a) theta_(3)=5 <= 3 fails.                          NOT eq.
+#   x=4:  (a) theta_(4)=5 <= 4 fails.                          NOT eq.
+#   x=5:  (a) theta_(5)=5 <= 5 ok.  (b) theta_(6)=9 > 6 ok.   EQUILIBRIUM
+#   x=6..8: (a) theta_(x)=9 <= x fails.                        NOT eq.
+#   x=9:  (a) theta_(9)=9 <= 9 ok.  (b) theta_(10)=9 > 10 fails. NOT eq.
+#   x=10: (a) theta_(10)=9 <= 10 ok. no non-actors.            EQUILIBRIUM
+#   The two definitions AGREE on {2, 5, 10}. This fixture was chosen so they
+#   agree; the office-hours congestion fixture is a case where only the
+#   corrected definition works at all.
+#
+# STABILITY (does a plus/minus-one perturbation return?)
+#   x=2:  G(1)=2 returns,  G(3)=2 returns          -> STABLE
+#   x=5:  G(4)=2 collapses to 2,  G(6)=5 returns   -> UNSTABLE (one-sided);
+#         losing a single actor at level 5 drops the whole population to 2.
+#         THIS IS THE TIPPING POINT.
+#   x=10: G(9)=10 returns                          -> STABLE
+#
+# WELFARE. At level x the x lowest-threshold agents act and are all satisfied
+# (see the equilibrium check), earning 10 - 1 = 9 each; the rest earn 0.
+#   W(2)  = 2*9  = 18
+#   W(5)  = 5*9  = 45
+#   W(10) = 10*9 = 90     <- the maximum possible (10 agents * 9)
+#   => efficientLevel = 10, efficient welfare 90.
+#
+# EXPECTED THEORY BLOCK
+#   family:            aggregate
+#   fixedPoints:       [{level: 2, stable: true},
+#                       {level: 5, stable: false},
+#                       {level: 10, stable: true}]     (exactly 3, sorted)
+#   tippingPoints:     [5]                              (exactly one, interior)
+#   efficientLevel:    10
+#   monotonicityVerified: complement
+# EXPECTED VERDICTS: tipping_point_exists CONFIRMED (5 is interior and unstable).
+#
+# NOT ASSERTED, deliberately: `equilibriumLevel` and `welfareGap`. With three
+# equilibria the plan does not say which one `equilibriumLevel` selects. If the
+# selection rule is "smallest stable level" then equilibriumLevel = 2 and
+# welfareGap = 90 - 18 = 72; if it is "the level best-response dynamics from
+# zero reaches" it is also 2. Both are stated here so a future implementer can
+# pick one, but the test does not assert an unspecified choice.
+# Tolerance: exact integers, 1e-9.
+
+schemaVersion: "1"
+family: aggregate
+
+metadata:
+  id: golden-granovetter-cascade
+  title: Threshold cascade with an interior tipping point
+  sourceDescription: >
+    Ten people decide whether to join a protest. A couple will go no matter
+    what. Some need a decent crowd first. Most will only join once nearly
+    everyone else has.
+  tags: [golden, aggregate, granovetter, cascade, tipping_point]
+
+seed: 20260906
+
+population:
+  size: 10
+  roles:
+    - id: resident
+      share: 1.0
+      persona: "You will join once enough other people have already joined."
+
+actions:
+  kind: discrete
+  actions: [act, abstain]
+
+statistic:
+  kind: count
+  of: act
+
+# My own participation is inside the count, so the correct regret measure must
+# recompute the count with my action in it. See the party fixture for why.
+includesSelf: true
+
+payoff:
+  kind: threshold_binary
+  benefit: 10
+  cost: 1
+  outsideOption: 0
+  threshold:
+    kind: empirical
+    values: [0, 5, 9]
+    weights: [0.2, 0.3, 0.5]
+
+monotonicity: complement   # more actors is weakly better for an actor
+
+protocol:
+  regime: simultaneous
+  repetition:
+    rounds: 6
+    termination: fixed
+
+information:
+  observes: [own_action, own_payoff, own_type, aggregate_statistic]
+  lagRounds: 1
+
+communication:
+  kind: none
+
+sweep:
+  axes: []
+  replicates: 1
+  maxCells: 1
+
+claims:
+  - kind: tipping_point_exists

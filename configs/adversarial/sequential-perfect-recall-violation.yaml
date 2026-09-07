@@ -1,0 +1,162 @@
+# ADVERSARIAL. Structurally valid, schema-clean, and LYING.
+#
+# MUST BE REFUTED:
+#   claims[0] = {kind: dominant_strategy, role: p1, action: L, strict: true}
+# WITNESS MUST NAME the better strategy: p1 playing (R, then y) yields 4,
+#   while every strategy beginning with L yields at most 3. Named explicitly at
+#   step 5 below.
+#
+# ALSO EXPECTED: at least one entry in `errors` reporting a PERFECT RECALL
+#   violation. That is the primary defect and it is a hard fail — plan
+#   section 6: "Perfect recall: players must remember their own past moves.
+#   Hard fail if violated — backward induction is invalid without it, so the
+#   evaluator would produce confident nonsense."
+#   The claim is included so this fixture still has a refutable assertion; it
+#   is refutable on its own merits (step 5), independent of the recall bug.
+#
+# SETUP. p1 moves twice. p2 has no moves at all (a deliberate dummy — it keeps
+# the counterexample to a single player and removes any confound about whose
+# information is at stake).
+#
+#   root : p1 chooses L -> a  or  R -> b        [infoset h1]
+#   a    : p1 chooses x -> t1 or  y -> t2       [infoset h2]
+#   b    : p1 chooses x -> t3 or  y -> t4       [infoset h2]   <-- SAME infoset
+#   t1 = (p1 3, p2 1)   t2 = (p1 0, p2 2)
+#   t3 = (p1 1, p2 3)   t4 = (p1 4, p2 0)
+#
+# WHAT PASSES (this is why the fixture is adversarial and not just broken):
+#   1. The tree is acyclic, every node is reachable from `root`, every move
+#      points at a real node, and every leaf pays every role.
+#   2. INFOSET CONSISTENCY PASSES. Both nodes in h2 have the same owner (p1)
+#      and the same move set ({x, y}). The plan's infoset check is:
+#      "all nodes in one infoset share the same owner AND the same choices."
+#      They do. That check is satisfied and will NOT catch this.
+#   3. There are no chance nodes, so "chance probabilities sum to 1" is vacuous.
+#   4. Finite horizon: every path has length 2.
+#   Only a dedicated perfect-recall check catches this file.
+#
+# WHAT FAILS:
+#   5. PERFECT RECALL IS VIOLATED. h2 = {a, b} pools the node reached by p1's
+#      own move L with the node reached by p1's own move R. Both belong to p1.
+#      So p1 is required to act at h2 without knowing which of ITS OWN earlier
+#      moves it made. That is absent-mindedness, not hidden information: p1 has
+#      forgotten its own history.
+#      Consequence: backward induction is invalid. You cannot solve a to
+#      "x or y" and b to "x or y" separately, because p1 must play the SAME
+#      thing at both — the subtrees are not independent subgames. An evaluator
+#      that runs backward induction anyway will confidently return
+#      "at a play x (3 > 0), at b play y (4 > 1)", which is not a strategy p1
+#      is able to execute. That fabricated answer is precisely the failure mode
+#      the hard fail exists to prevent.
+#
+#   6. THE CLAIM, refuted on its own merits. p1's genuine strategy set, given
+#      the pooling, is {(L,x), (L,y), (R,x), (R,y)} where the second component
+#      is played at h2 regardless of branch:
+#        (L, x) -> t1 -> p1 gets 3
+#        (L, y) -> t2 -> p1 gets 0
+#        (R, x) -> t3 -> p1 gets 1
+#        (R, y) -> t4 -> p1 gets 4     <-- STRICTLY BEST
+#      p2 has no decision node, so nothing else varies and there is no "for all
+#      opponent behaviour" quantifier to check. L is not dominant; it is not
+#      even part of the best strategy. Best with L = 3 < 4. REFUTED.
+#
+# EXPECTED WITNESS SHAPE (content, not format):
+#   {claimedAction: L, bestStrategy: [R, y], claimedBestPayoff: 3,
+#    actualBestPayoff: 4, gain: 1}
+# EXPECTED ERROR SHAPE (content, not format):
+#   perfect recall violated at infoset h2: it pools nodes a and b, which are
+#   distinguished by p1's own earlier move (L vs R).
+
+schemaVersion: "1"
+family: sequential
+
+metadata:
+  id: adversarial-sequential-perfect-recall-violation
+  title: Sequential game where a player forgets its own move
+  sourceDescription: >
+    Someone picks one of two doors, walks down a corridor, and then has to pick
+    left or right without any memory of which door they came through.
+  tags: [adversarial, sequential, perfect_recall, false_claim]
+
+seed: 20260906
+
+population:
+  size: 2
+  roles:
+    - id: p1
+      share: 0.5
+      persona: "You move twice, but you will not remember what you did first."
+    - id: p2
+      share: 0.5
+      persona: "You watch. You never move."
+
+tree:
+  kind: explicit
+  root: root
+  nodes:
+    root:
+      kind: decision
+      owner: p1
+      infoset: h1
+      moves:
+        L: a
+        R: b
+    a:
+      kind: decision
+      owner: p1
+      infoset: h2
+      moves:
+        x: t1
+        y: t2
+    b:
+      kind: decision
+      owner: p1
+      infoset: h2
+      moves:
+        x: t3
+        y: t4
+    t1:
+      kind: terminal
+      payoffs: { p1: 3, p2: 1 }
+    t2:
+      kind: terminal
+      payoffs: { p1: 0, p2: 2 }
+    t3:
+      kind: terminal
+      payoffs: { p1: 1, p2: 3 }
+    t4:
+      kind: terminal
+      payoffs: { p1: 4, p2: 0 }
+  infosets:
+    - id: h1
+      owner: p1
+      nodes: [root]
+    # THE DEFECT. Same owner, same move set, so the infoset consistency check
+    # passes — but a and b differ only by p1's OWN earlier move, so pooling
+    # them means p1 has forgotten what it did.
+    - id: h2
+      owner: p1
+      nodes: [a, b]
+
+protocol:
+  regime: simultaneous
+  repetition:
+    rounds: 1
+    termination: fixed
+
+information:
+  observes: [own_action, own_payoff]
+
+communication:
+  kind: none
+
+sweep:
+  axes: []
+  replicates: 1
+  maxCells: 1
+
+claims:
+  - kind: dominant_strategy
+    role: p1
+    action: L
+    strict: true

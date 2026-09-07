@@ -1,0 +1,140 @@
+# GOLDEN. Closed-form. The office-hours congestion scenario from
+# configs/office-hours-crowding.yaml, PINNED at capacity = 8 so the answer is a
+# single exact number rather than a sweep. The parent file keeps the range
+# {min: 4, max: 12, steps: 5}; this file is the capacity-8 cell of that sweep,
+# which is the cell the plan works through by hand.
+#
+# SEMANTICS of `congestion`, quoted from the FORMULA comment on
+# AggregatePayoff in src/spec/types.ts. With capacity K, value under capacity
+# v, signed slope s, outside option w, and turnout n:
+#     payoff(attend) = v + s * max(0, n - K)      -- v is a CEILING, not a line
+#     payoff(skip)   = w
+# Unclamped: the attend payoff is allowed to go negative. The `max(0, ...)` is
+# what makes v a ceiling rather than a line through it.
+#
+# Numbers: N = 30, K = 8, v = 10, s = -1.5, w = 3.
+#     payoff(attend, n) = 10 - 1.5 * max(0, n - 8)
+#     payoff(skip)      = 3
+#
+# DERIVATION
+#
+# 1. EQUILIBRIUM TURNOUT = 12.
+#    Note the naive iterate map is useless here: every attendee has the same
+#    payoff, so "everyone best-responds to the observed turnout" flips the
+#    whole population between 0 and 30 and never settles. The equilibrium is
+#    the MARGINAL one — no agent has a profitable unilateral deviation, with
+#    the deviator's own action recounted (includesSelf: true):
+#      (a) no attendee wants out:  payoff(attend, n)   >= 3
+#      (b) no skipper wants in:    payoff(attend, n+1) <  3
+#    Solve (a):  10 - 1.5(n - 8) >= 3  =>  1.5(n - 8) <= 7  =>  n <= 12.666...
+#                so the largest integer satisfying (a) is n = 12.
+#    Check n = 12:  attend pays 10 - 1.5*4 = 10 - 6 = 4  >= 3.  (a) ok.
+#    Check (b):     a 13th joiner makes n = 13, paying
+#                   10 - 1.5*5 = 10 - 7.5 = 2.5  <  3.  (b) ok.
+#    n = 12 is an equilibrium.
+#    Uniqueness: for n <= 11 a skipper joining reaches n+1 <= 12 and earns
+#    >= 4 > 3, so (b) fails. For n >= 13 an attendee earns <= 2.5 < 3, so (a)
+#    fails. => the equilibrium level is UNIQUE at 12.
+#    Stability: from n = 11 one more joins (up to 12); from n = 13 one leaves
+#    (down to 12). STABLE.
+#
+# 2. EFFICIENT TURNOUT = 8.
+#    W(n) = n * (10 - 1.5*max(0, n-8)) + (30 - n) * 3
+#      W(0)  =  0    + 90  =  90
+#      W(4)  = 40    + 78  = 118
+#      W(7)  = 70    + 69  = 139
+#      W(8)  = 80    + 66  = 146     <- maximum
+#      W(9)  = 9*8.5 = 76.5 + 63     = 139.5
+#      W(10) = 10*7  = 70   + 60     = 130
+#      W(12) = 12*4  = 48   + 54     = 102
+#    Below capacity each attendee swaps 3 for 10, so W rises by 7 per head up
+#    to n = 8. Past capacity the marginal attendee gains
+#      (10 - 1.5(n-8)) - 3  and imposes -1.5 on each of the other n-1
+#    attendees; at n = 9 that is (8.5 - 3) - 1.5*8 = 5.5 - 12 = -6.5 < 0, and
+#    it only gets worse. Maximum is at n = 8, welfare 146.
+#
+# 3. WELFARE GAP = 146 - 102 = 44.
+#
+# 4. SOCIAL DILEMMA. Equilibrium welfare 102 < efficient welfare 146, so under
+#    the plan's section 6 WELFARE reading the claim is CONFIRMED — which is
+#    what the plan's own worked example asserts.
+#    Stated honestly: it is NOT Pareto-dominated. Moving from n=12 to n=8 sends
+#    four attendees from 4 down to 3. See configs/README.md, "Two readings of
+#    social_dilemma" — this fixture is the one that distinguishes them.
+#
+# 5. Monotonicity: s = -1.5 < 0, so an extra attendee lowers every attendee's
+#    payoff above capacity => `substitute`. Sign check passes.
+#
+# EXPECTED THEORY BLOCK
+#   family:               aggregate
+#   fixedPoints:          [{level: 12, stable: true}]        (exactly one)
+#   tippingPoints:        []                                 (empty)
+#   equilibriumLevel:     12
+#   efficientLevel:       8
+#   welfareGap:           44
+#   monotonicityVerified: substitute
+# EXPECTED VERDICTS: social_dilemma CONFIRMED (welfare reading).
+# Tolerance: 1e-9.
+
+schemaVersion: "1"
+family: aggregate
+
+metadata:
+  id: golden-congestion-office-hours
+  title: Office hours with crowding, capacity 8
+  sourceDescription: >
+    30 students decide whether to go to office hours. It's useful if it isn't
+    packed, but past about 8 people the TA can't get to everyone.
+  tags: [golden, aggregate, congestion, social_dilemma]
+
+seed: 20260905
+
+population:
+  size: 30
+  roles:
+    - id: struggling
+      share: 0.4
+      persona: "You're behind in the class and need help urgently."
+    - id: comfortable
+      share: 0.6
+      persona: "You're doing fine but could use some clarification."
+
+actions:
+  kind: discrete
+  actions: [attend, skip]
+
+statistic:
+  kind: count
+  of: attend
+
+includesSelf: true
+
+payoff:
+  kind: congestion
+  capacity: 8
+  valueUnderCapacity: 10
+  slopeOver: -1.5
+  outsideOption: 3
+
+monotonicity: substitute
+
+protocol:
+  regime: simultaneous
+  repetition:
+    rounds: 5
+    termination: fixed
+
+information:
+  observes: [own_action, own_payoff, aggregate_statistic]
+  lagRounds: 1
+
+communication:
+  kind: none
+
+sweep:
+  axes: []
+  replicates: 1
+  maxCells: 1
+
+claims:
+  - kind: social_dilemma

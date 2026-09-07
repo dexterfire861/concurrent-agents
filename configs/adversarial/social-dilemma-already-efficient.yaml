@@ -1,0 +1,116 @@
+# ADVERSARIAL. Structurally valid, schema-clean, and LYING.
+#
+# MUST BE REFUTED:  claims[0] = {kind: social_dilemma}
+# WITNESS MUST SHOW: equilibriumLevel == efficientLevel == 4 and
+#   welfareGap == 0. There is no conflict between individual and collective
+#   interest here at all, so nothing is being studied.
+#
+# Compare configs/golden/linear-public-good.yaml. The ONLY difference is mpcr:
+#   golden      mpcr = 0.5   (1/N < 0.5 < 1)  -> genuine dilemma
+#   adversarial mpcr = 1.25  (> 1)            -> no dilemma
+# src/spec/types.ts states the condition directly on the `linear_public_good`
+# variant: "Contributing is individually irrational but collectively optimal
+# exactly when 1/N < mpcr < 1 — the validator checks this for a
+# `social_dilemma` claim." This fixture is the negative test for that check.
+#
+# SETUP: N = 4, endowment E = 20, mpcr m = 1.25.
+#   u_i = (E - c_i) + m * C,  C = total contributions, c_i in {0, 20}.
+#
+# WHAT PASSES:
+#   1. Role shares sum to 1; population size, actions, statistic all well-formed.
+#   2. monotonicity: complement matches the sign — each extra contributor adds
+#      m*E = 25 to everyone. The sign check does NOT catch this one.
+#   3. An equilibrium exists and is unique. "Does the solver find an
+#      equilibrium" passes.
+#
+# WHAT FAILS:
+#   4. CONTRIBUTING is strictly dominant, not keeping. With j of the other
+#      three contributing:
+#        keep       -> 20 + 1.25 * 20 * j       = 20 + 25j
+#        contribute ->  0 + 1.25 * 20 * (j + 1) = 25j + 25
+#      contribute - keep = 25j + 25 - 20 - 25j = +5, for every j in {0,1,2,3}.
+#      Putting 20 into the pot returns 25 to you personally. It is not a
+#      sacrifice; it is a profit.
+#
+#   5. Equilibrium level = 4 (everyone contributes).
+#      Payoff each: 0 + 1.25 * 80 = 100.  Equilibrium welfare = 400.
+#
+#   6. Efficient level. W(k) = k*(1.25*20*k) + (4-k)*(20 + 1.25*20*k)
+#                            = 25k^2 + (4-k)(20 + 25k)
+#        W(0) = 0   + 4*20  =  80
+#        W(1) = 25  + 3*45  =  25 + 135 = 160
+#        W(2) = 100 + 2*70  = 100 + 140 = 240
+#        W(3) = 225 + 1*95  = 225 +  95 = 320
+#        W(4) = 400 + 0     = 400
+#      Maximum at k = 4, welfare 400.
+#      (Each contribution adds N*m*E - E = 4*1.25*20 - 20 = 100 - 20 = +80,
+#       matching the constant step of 80 above.)
+#
+#   7. equilibriumLevel (4) == efficientLevel (4).  welfareGap = 400 - 400 = 0.
+#      The selfish outcome is the collectively best outcome. REFUTED.
+#      There is no Pareto-dominated equilibrium either, so the claim fails on
+#      BOTH readings of social_dilemma (see configs/README.md).
+#
+# EXPECTED WITNESS SHAPE (content, not format):
+#   {equilibriumLevel: 4, efficientLevel: 4, welfareGap: 0, mpcr: 1.25,
+#    dilemmaBand: [0.25, 1]}   -- 1.25 is outside 1/N < mpcr < 1
+# EXPECTED `errors`: none required. A warning that mpcr >= 1 makes contribution
+#   dominant would be reasonable, but the load-bearing output is the refutation.
+
+schemaVersion: "1"
+family: aggregate
+
+metadata:
+  id: adversarial-social-dilemma-already-efficient
+  title: Public good with no dilemma
+  sourceDescription: >
+    Four people each hold twenty tokens. Anything put into the common pot is
+    multiplied by five and split four ways. Everyone is better off if all four
+    contribute.
+  tags: [adversarial, aggregate, public_goods, social_dilemma, false_claim]
+
+seed: 20260906
+
+population:
+  size: 4
+  roles:
+    - id: member
+      share: 1.0
+      persona: "You hold twenty tokens and decide whether to put them in the pot."
+
+actions:
+  kind: discrete
+  actions: [contribute, keep]
+
+statistic:
+  kind: count
+  of: contribute
+
+includesSelf: true
+
+payoff:
+  kind: linear_public_good
+  endowment: 20
+  mpcr: 1.25
+
+monotonicity: complement
+
+protocol:
+  regime: simultaneous
+  repetition:
+    rounds: 1
+    termination: fixed
+
+information:
+  observes: [own_action, own_payoff, aggregate_statistic]
+
+communication:
+  kind: none
+
+sweep:
+  axes: []
+  replicates: 1
+  maxCells: 1
+
+claims:
+  - kind: social_dilemma

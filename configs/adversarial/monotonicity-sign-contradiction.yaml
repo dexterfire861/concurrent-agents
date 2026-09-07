@@ -1,0 +1,136 @@
+# ADVERSARIAL. Structurally valid, schema-clean, and LYING.
+#
+# MUST BE REFUTED:  claims[0] = {kind: tipping_point_exists}
+# WITNESS MUST SHOW: the only fixed point is 8, and it is STABLE, so
+#   tippingPoints = []. There is no unstable crossing to tip through.
+#
+# ALSO EXPECTED: at least one entry in `errors` reporting the MONOTONICITY SIGN
+#   CONTRADICTION. That is the defect this fixture is named for:
+#     slopeOver = -2  (each attendee past capacity costs every attendee 2)
+#     monotonicity: complement  ("more participation helps")
+#   Those cannot both be true. src/spec/types.ts spells the convention out on
+#   the `congestion` variant: "SIGN CONVENTION: `slopeOver` is the signed
+#   slope, so crowding is a NEGATIVE number ... the validator must reject
+#   slopeOver > 0 whenever `monotonicity` is 'substitute'."
+#   This file is the MIRROR of the case written there: a negative slope
+#   declared as `complement`. Both directions are the same error — a
+#   participation externality whose declared sign is the opposite of its
+#   arithmetic sign — and a validator that checks only the stated direction
+#   will let this file through. That asymmetry is reported as a spec gap.
+#   Getting it wrong inverts every equilibrium in the run: a solver that
+#   trusted `complement` would look for a coordination tipping point in a
+#   congestion game and either find nothing or invent something.
+#
+# SETUP: N = 20, capacity K = 5, valueUnderCapacity v = 10, slopeOver s = -2,
+# outsideOption w = 3.
+#     payoff(attend, n) = 10 + (-2) * max(0, n - 5) = 10 - 2*max(0, n - 5)
+#     payoff(skip)      = 3
+#
+# WHAT PASSES:
+#   1. Role shares sum to 1; population, actions, statistic all well-formed.
+#   2. `includesSelf` is explicitly set.
+#   3. An equilibrium exists, is unique, and is interior (8 out of 20) — so
+#      "did the solver find something" passes and the number even looks
+#      reasonable in a report.
+#
+# WHAT FAILS:
+#   4. SIGN. The attend payoff is strictly DECREASING in turnout above
+#      capacity: d(payoff)/dn = -2 < 0. More participation hurts. The correct
+#      declaration is `substitute`; the file says `complement`. HARD ERROR.
+#
+#   5. NO TIPPING POINT. Equilibrium condition with the self-inclusion
+#      correction (no profitable unilateral deviation, own action recounted):
+#        (a) no attendee wants out:   10 - 2*max(0, n-5)   >= 3
+#        (b) no skipper wants in:     10 - 2*max(0, n+1-5) <  3
+#      Solve (a): 2(n - 5) <= 7  =>  n <= 8.5  =>  largest integer n = 8.
+#      Check n = 8:  attend pays 10 - 2*3 = 4 >= 3.        (a) ok.
+#      Check (b):    a 9th joiner makes n = 9, paying
+#                    10 - 2*4 = 2 < 3.                     (b) ok.
+#      n = 8 is an equilibrium.
+#      Uniqueness: for n <= 7 a skipper joining reaches n+1 <= 8 and earns
+#        >= 4 > 3, so (b) fails. For n >= 9 an attendee earns <= 2 < 3, so (a)
+#        fails. The equilibrium is UNIQUE at 8.
+#      Stability: from 7 one more joins (up to 8); from 9 one leaves (down to
+#        8). STABLE from both sides.
+#      => fixedPoints = [{level: 8, stable: true}], tippingPoints = [].
+#         A congestion game with a negative slope has a single self-correcting
+#         level; it has no tipping dynamics at all. REFUTED.
+#
+#   6. For reference, the welfare numbers (not asserted, but they show the
+#      equilibrium is a genuine one and the refutation is not an artefact):
+#        W(n) = n*(10 - 2*max(0, n-5)) + (20 - n)*3
+#        W(4) = 40 + 48 = 88;  W(5) = 50 + 45 = 95;  W(6) = 48 + 42 = 90;
+#        W(7) = 42 + 39 = 81;  W(8) = 32 + 36 = 68
+#      Efficient level 5 (welfare 95) vs equilibrium level 8 (welfare 68).
+#      A `social_dilemma` claim WOULD be confirmed here under the welfare
+#      reading — which is exactly why it is not claimed. This fixture must fail
+#      on the sign and the tipping claim only.
+#
+# EXPECTED WITNESS SHAPE (content, not format):
+#   {fixedPoints: [{level: 8, stable: true}], tippingPoints: [],
+#    reason: unique stable equilibrium; no unstable crossing}
+# EXPECTED ERROR SHAPE (content, not format):
+#   declared monotonicity `complement` contradicts slopeOver = -2 at
+#   /monotonicity; the payoff is decreasing in the statistic.
+
+schemaVersion: "1"
+family: aggregate
+
+metadata:
+  id: adversarial-monotonicity-sign-contradiction
+  title: Congestion game declared as a complement
+  sourceDescription: >
+    Twenty people decide whether to use the shared gym. It gets unpleasant once
+    more than five are in there. The more people who turn up, the better.
+  tags: [adversarial, aggregate, congestion, monotonicity, false_claim]
+
+seed: 20260906
+
+population:
+  size: 20
+  roles:
+    - id: member
+      share: 1.0
+      persona: "You decide whether to use the gym this evening."
+
+actions:
+  kind: discrete
+  actions: [attend, skip]
+
+statistic:
+  kind: count
+  of: attend
+
+includesSelf: true
+
+payoff:
+  kind: congestion
+  capacity: 5
+  valueUnderCapacity: 10
+  slopeOver: -2      # NEGATIVE: crowding. Contradicts `complement` below.
+  outsideOption: 3
+
+# THE DEFECT. The payoff falls by 2 per extra attendee above capacity, so this
+# is a `substitute`. Declaring `complement` inverts the sign the solver relies on.
+monotonicity: complement
+
+protocol:
+  regime: simultaneous
+  repetition:
+    rounds: 5
+    termination: fixed
+
+information:
+  observes: [own_action, own_payoff, aggregate_statistic]
+  lagRounds: 1
+
+communication:
+  kind: none
+
+sweep:
+  axes: []
+  replicates: 1
+  maxCells: 1
+
+claims:
+  - kind: tipping_point_exists

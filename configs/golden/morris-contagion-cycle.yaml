@@ -1,0 +1,146 @@
+# GOLDEN. Closed-form. Morris (2000) contagion on a network, on the one graph
+# whose contagion threshold is known exactly: the cycle.
+#
+# SEMANTICS of `local_threshold` (per the type comment "act iff a fraction of
+# neighbors already has"): agent i adopts iff
+#     (adopted neighbours of i) / (degree of i)  >=  q
+# where q is the drawn threshold. The comparison is WEAK (>=). That matters at
+# q = 0.5 on a degree-2 graph, where exactly one adopted neighbour out of two
+# is the boundary case; see step 2 below.
+#
+# GRAPH: an undirected 10-cycle. Edges 0-1, 1-2, ..., 8-9, 9-0.
+#   nodes 10, edges 10, every degree exactly 2, one connected component.
+#   meanDegree = 2 * edges / nodes = 2 * 10 / 10 = 2.
+#   components = [10].
+# Contrast the adversarial twin
+# (configs/adversarial/contagion-disconnected-graph.yaml), which is this graph
+# cut into two components.
+#
+# SEED SET: {0}. One node out of ten (10%), well short of "so many seeds the
+# cascade is forced", which plan section 6 requires of a contagion claim.
+#
+# THRESHOLD: point 0.5 for everyone. Strictly inside (0, 1) as required.
+#
+# DERIVATION 1 -- THE CASCADE, ROUND BY ROUND
+# Every node has degree 2, so the adoption rule "fraction of neighbours >= 0.5"
+# means "at least 1 of my 2 neighbours has adopted".
+#   t0: {0}                                        size 1
+#   t1: 1 and 9 each border 0 (1/2 = 0.5 >= 0.5)   -> {0,1,9}          size 3
+#   t2: 2 borders 1; 8 borders 9                   -> {0,1,2,8,9}      size 5
+#   t3: 3 borders 2; 7 borders 8                   -> {0,1,2,3,7,8,9}  size 7
+#   t4: 4 borders 3; 6 borders 7                   -> all but 5        size 9
+#   t5: 5 borders both 4 and 6 (2/2 = 1 >= 0.5)    -> all ten          size 10
+#   t6: no change. Converged after 5 propagation rounds.
+#   => predictedCascadeSize = 10. COMPLETE contagion from a single seed.
+#
+# DERIVATION 2 -- WHY 0.5 IS THE THRESHOLD FOR THIS GRAPH
+# Morris's contagion threshold of a graph is the largest q for which some
+# FINITE seed set infects the whole network. For the line (and equivalently the
+# cycle, which is the line with its ends joined) that value is 1/2:
+#   * at q <= 1/2 a node needs only one adopted neighbour, so adoption walks
+#     outward from any seed one step per round and never stalls. Shown above.
+#   * at q > 1/2 a degree-2 node needs BOTH neighbours, so the frontier of any
+#     finite seed set can never advance: the node just outside the set always
+#     has exactly one adopted neighbour. A single seed spreads nowhere.
+# So contagionThreshold = 0.5, and this fixture sits exactly on it (q = 0.5),
+# on the spreading side because the comparison is weak.
+#
+# DERIVATION 3 -- EQUILIBRIA (a different question from the cascade)
+# A cascade is a prediction about DYNAMICS; a Nash profile is a prediction
+# about a resting point. Both all-adopt and all-abstain are pure Nash here:
+#   all-adopt:   every node sees 2/2 = 1 >= 0.5, so adopting is a best reply.
+#   all-abstain: every node sees 0/2 = 0 <  0.5, so abstaining is a best reply.
+# Both are reported as equilibria, and NEITHER of them is the cascade answer.
+# Best-response dynamics from the seed set converge (step t6 above), so
+# bestResponseConverged = true.
+#
+# DERIVATION 4 -- LOCALITY (asserted as a property test, not a number)
+# Node 0's payoff is a function of nodes 1 and 9 only. Changing node 5's action
+# cannot change node 0's payoff or node 0's regret. This graph makes the test
+# sharp: 5 is the antipode of 0, the furthest possible non-neighbour.
+#
+# EXPECTED THEORY BLOCK
+#   family:                network_local
+#   graphStats.nodes:      10
+#   graphStats.edges:      10
+#   graphStats.components: [10]          (one component, all ten nodes)
+#   graphStats.meanDegree: 2
+#   contagionThreshold:    0.5
+#   predictedCascadeSize:  10
+#   bestResponseConverged: true
+#   pureNash:              contains all-adopt and all-abstain
+# EXPECTED VERDICTS: none — `claims` is deliberately EMPTY.
+#   StructuralClaim has no contagion/cascade variant, so there is no honest way
+#   to assert "it spreads" in this spec. Reported as a type-boundary gap rather
+#   than papered over by borrowing `tipping_point_exists`, which is an
+#   aggregate-family claim about fixed points of a headcount map.
+# Tolerance: 1e-9 (all values exact).
+
+schemaVersion: "1"
+family: network_local
+
+metadata:
+  id: golden-morris-contagion-cycle
+  title: Morris contagion on a ten-cycle
+  sourceDescription: >
+    Ten people sit in a ring, each aware only of the two people beside them.
+    Each will switch to the new way of doing things once at least half the
+    people they can see have. One person starts.
+  tags: [golden, network_local, morris, contagion, locality]
+
+seed: 20260906
+
+population:
+  size: 10
+  roles:
+    - id: node
+      share: 1.0
+      persona: "You copy the new behaviour once enough of your immediate neighbours have."
+
+actions:
+  kind: discrete
+  actions: [adopt, abstain]
+
+graph:
+  kind: explicit
+  directed: false
+  edges:
+    - [0, 1]
+    - [1, 2]
+    - [2, 3]
+    - [3, 4]
+    - [4, 5]
+    - [5, 6]
+    - [6, 7]
+    - [7, 8]
+    - [8, 9]
+    - [9, 0]
+
+payoff:
+  kind: local_threshold
+  threshold:
+    kind: point
+    value: 0.5
+
+seedSet:
+  kind: explicit
+  nodes: [0]
+
+protocol:
+  regime: simultaneous
+  repetition:
+    rounds: 8
+    termination: fixed
+
+information:
+  observes: [own_action, own_payoff, own_type, neighbor_actions]
+
+communication:
+  kind: none
+
+sweep:
+  axes: []
+  replicates: 1
+  maxCells: 1
+
+claims: []

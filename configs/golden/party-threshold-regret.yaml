@@ -1,0 +1,138 @@
+# GOLDEN. Closed-form. The party case from plan section 3.3, encoded so the
+# three-regret distinction can be asserted as an exact pair of numbers.
+#
+# This is the single most important fixture in the repo. It is the guard on the
+# most likely correctness bug in the system: reusing normal-form regret code in
+# a family where YOU ARE INSIDE THE HEADCOUNT.
+#
+# SETUP (from the plan, verbatim in numbers):
+#   You enjoy the party only if at least 10 people are there, counting you.
+#   Staying home is worth 3. You stayed home. 9 others went.
+#
+# Encoding: N = 10, threshold = point 10 for everyone, benefit = 10, cost = 0,
+# outsideOption = 3, statistic = count of `attend`, includesSelf = true.
+# Threshold 10 <= N = 10, so it is reachable (plan section 6).
+#
+# SEMANTICS of `threshold_binary`, per the FORMULA comment on AggregatePayoff
+# in src/spec/types.ts (same as the Granovetter fixture):
+#     payoff(attend) = benefit * [ count >= own threshold ] - cost
+#                    = 10 * [ count >= 10 ] - 0
+#     payoff(stay)   = outsideOption = 3
+#
+# THE TRACE the test hands the evaluator (built in test/regret.test.ts, not
+# stored here, because a trace is a run artifact not a spec):
+#   agent a0 -> stay,   agents a1..a9 -> attend.  Realized count = 9.
+#   Payoffs: a1..a9 each get 10 * [9 >= 10] = 0.  a0 gets 3.
+#
+# DERIVATION OF a0's TWO REGRETS
+#
+#   Way 1 -- price_taking. Hold the statistic fixed at the observed 9.
+#     counterfactual payoff(attend) = 10 * [9 >= 10] = 0
+#     best available under this measure = max(3, 0) = 3 = what a0 actually got
+#     REGRET = 3 - 3 = 0.
+#     This is the WRONG-but-tempting answer: it forgets a0 is in the count.
+#
+#   Way 2 -- ex_post_aggregate_corrected. Recompute the statistic with a0's
+#   counterfactual action in it. Others' actions are fixed at 9 attendees.
+#     if a0 stays:   count = 9  -> payoff 3
+#     if a0 attends: count = 10 -> 10 * [10 >= 10] = 10
+#     best available = 10, actual = 3
+#     REGRET = 10 - 3 = 7.
+#     a0 was the pivotal tenth person and blew it.
+#
+#   Same night, same data, opposite conclusions. The report must carry BOTH,
+#   separately typed, and must never average them.
+#
+# EXPECTED ASSERTIONS (exact, tolerance 1e-9)
+#   measured.perAgent["a0"].regret contains
+#       {kind: "price_taking",                 value: 0}
+#   measured.perAgent["a0"].regret contains
+#       {kind: "ex_post_aggregate_corrected",  value: 7}
+#   and the two values are NOT equal — that inequality is the test.
+#
+# For an attendee (say a1), for completeness:
+#   actual payoff 0.
+#   price_taking:  hold count at 9; attend pays 0, stay pays 3 -> best 3,
+#                  regret 3 - 0 = 3.
+#   corrected:     others = 8 attendees; a1 attends -> count 9 -> 0;
+#                  a1 stays -> count 8 -> 3. best 3, regret 3 - 0 = 3.
+#   Here the two measures AGREE (a1 was not pivotal). Only the pivotal agent
+#   separates them, which is exactly why a corpus-wide average would hide the
+#   bug and a single named agent does not.
+#
+# THEORY BLOCK (spec alone, for reference; the test asserts the regrets)
+#   G(x) = number who want to attend at observed level x
+#        = 10 if x >= 10 else 0.
+#   Fixed points: x = 0 (G(0)=0, stable) and x = 10 (G(10)=10, stable).
+#   Corrected check at x = 0: a joiner makes count 1, and 1 >= 10 is false, so
+#   nobody wants in -> 0 really is an equilibrium.
+#   Corrected check at x = 10: everyone attends and 10 >= 10 -> content.
+#   There is no interior fixed point, so tippingPoints = [] and this spec does
+#   NOT claim tipping_point_exists.
+#   Welfare: W(0) = 10 * 3 = 30; W(10) = 10 * 10 = 100. efficientLevel = 10.
+#   Intermediate levels are not equilibria: at 1 <= x <= 9 the attendees earn
+#   0 < 3 and would leave.
+#
+# Tolerance: 1e-9.
+
+schemaVersion: "1"
+family: aggregate
+
+metadata:
+  id: golden-party-threshold-regret
+  title: The party, ten people, threshold ten
+  sourceDescription: >
+    Ten friends decide whether to show up. The party is only fun if everyone
+    comes. Staying home is a quiet but acceptable evening.
+  tags: [golden, aggregate, regret, pivotal, includes_self]
+
+seed: 20260906
+
+population:
+  size: 10
+  roles:
+    - id: friend
+      share: 1.0
+      persona: "You only enjoy the party if basically everyone shows up."
+
+actions:
+  kind: discrete
+  actions: [attend, stay]
+
+statistic:
+  kind: count
+  of: attend
+
+# THE load-bearing field. With includesSelf false the corrected regret would
+# collapse into the price-taking one and this fixture would prove nothing.
+includesSelf: true
+
+payoff:
+  kind: threshold_binary
+  benefit: 10
+  cost: 0
+  outsideOption: 3
+  threshold:
+    kind: point
+    value: 10
+
+monotonicity: complement
+
+protocol:
+  regime: simultaneous
+  repetition:
+    rounds: 1
+    termination: fixed
+
+information:
+  observes: [own_action, own_payoff, aggregate_statistic]
+
+communication:
+  kind: none
+
+sweep:
+  axes: []
+  replicates: 1
+  maxCells: 1
+
+claims: []

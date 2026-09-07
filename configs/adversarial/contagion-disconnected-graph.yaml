@@ -1,0 +1,134 @@
+# ADVERSARIAL. Structurally valid, schema-clean, and LYING.
+#
+# MUST BE REFUTED:  claims[0] = {kind: tipping_point_exists}
+# WITNESS MUST SHOW the component structure: components = [5, 5], the seed set
+#   {0} lies entirely inside one of them, and the cascade can therefore reach
+#   at most 5 of 10 nodes no matter what. "It spreads through the network" is
+#   meaningless on a graph that is not connected — plan section 6:
+#   "Connectivity reported. A disconnected graph makes 'it spreads through the
+#   network' meaningless — warn, and record component sizes."
+#
+# CAVEAT, stated rather than hidden: `tipping_point_exists` is the closest
+#   claim in StructuralClaim, but it is really an AGGREGATE-family claim about
+#   fixed points of a headcount map. StructuralClaim has no contagion or
+#   cascade variant, so a network spec has no honest way to assert "it
+#   spreads". This is reported as a type-boundary gap. The golden twin
+#   (configs/golden/morris-contagion-cycle.yaml) declares NO claims for exactly
+#   this reason; this file declares one because an adversarial fixture without
+#   a refutable claim would not test the refutation path at all.
+#
+# SETUP: the golden 10-cycle CUT INTO TWO 5-CYCLES.
+#   component A: 0-1-2-3-4-0
+#   component B: 5-6-7-8-9-5
+#   10 nodes, 10 edges, every degree still exactly 2, meanDegree still 2.
+#   Seed set {0}. Threshold point 0.5 for everyone, weak comparison (>=).
+#
+# WHAT PASSES (a checker looking at aggregates alone sees no difference):
+#   1. Node count matches population size: 10 = 10.
+#   2. No self-loops; every index is in range 0..9; the edge list is a valid
+#      undirected graph.
+#   3. meanDegree = 2*10/10 = 2 — IDENTICAL to the connected golden fixture.
+#      Degree distribution is identical too: every node has degree 2.
+#   4. The contagion threshold check passes: 0.5 is strictly inside (0, 1).
+#   5. The seed set is small (1 of 10), so "seed group small enough not to
+#      trivially force a full cascade" passes.
+#   Only an explicit connectivity computation separates this file from the
+#   golden one.
+#
+# WHAT FAILS:
+#   6. The graph has TWO components of 5 nodes each. Nodes 5..9 have no path to
+#      node 0, so no sequence of adoptions can ever reach them.
+#
+#   7. The cascade, round by round (rule: at least 1 of my 2 neighbours):
+#        t0: {0}                                       size 1
+#        t1: 1 and 4 border 0            -> {0,1,4}    size 3
+#        t2: 2 borders 1; 3 borders 4    -> {0,1,2,3,4} size 5
+#        t3: no change. Component A is saturated.
+#        Nodes 5,6,7,8,9 each see 0/2 = 0 < 0.5, forever.
+#      => predictedCascadeSize = 5, and it is capped at 5 by the component, not
+#         by the threshold. Half the population is unreachable by construction.
+#
+#   8. There is no tipping level for the population as a whole. The system has
+#      a stable resting point at 5 adopters that is a pure artefact of where
+#      the seed was placed, and no perturbation inside component A can ever
+#      move component B. Nothing tips. REFUTED.
+#
+# EXPECTED WITNESS SHAPE (content, not format):
+#   {components: [5, 5], seedSet: [0], seedComponentSize: 5,
+#    maxReachableCascade: 5, populationSize: 10,
+#    reason: graph is disconnected; the seed cannot reach nodes 5..9}
+# EXPECTED: at least a WARNING recording the component sizes (plan section 6
+#   says warn, not fail, on disconnection). The refuted verdict is the
+#   load-bearing assertion.
+
+schemaVersion: "1"
+family: network_local
+
+metadata:
+  id: adversarial-contagion-disconnected-graph
+  title: Contagion claimed on a disconnected graph
+  sourceDescription: >
+    Ten people, each aware only of their two immediate neighbours. Each adopts
+    once half the people they can see have. One person starts, and the idea
+    spreads through the whole group.
+  tags: [adversarial, network_local, contagion, connectivity, false_claim]
+
+seed: 20260906
+
+population:
+  size: 10
+  roles:
+    - id: node
+      share: 1.0
+      persona: "You copy the new behaviour once enough of your neighbours have."
+
+actions:
+  kind: discrete
+  actions: [adopt, abstain]
+
+graph:
+  kind: explicit
+  directed: false
+  # Two disjoint 5-cycles. Same node count, same edge count, same degree
+  # distribution, same mean degree as the connected golden fixture.
+  edges:
+    - [0, 1]
+    - [1, 2]
+    - [2, 3]
+    - [3, 4]
+    - [4, 0]
+    - [5, 6]
+    - [6, 7]
+    - [7, 8]
+    - [8, 9]
+    - [9, 5]
+
+payoff:
+  kind: local_threshold
+  threshold:
+    kind: point
+    value: 0.5
+
+seedSet:
+  kind: explicit
+  nodes: [0]
+
+protocol:
+  regime: simultaneous
+  repetition:
+    rounds: 8
+    termination: fixed
+
+information:
+  observes: [own_action, own_payoff, own_type, neighbor_actions]
+
+communication:
+  kind: none
+
+sweep:
+  axes: []
+  replicates: 1
+  maxCells: 1
+
+claims:
+  - kind: tipping_point_exists

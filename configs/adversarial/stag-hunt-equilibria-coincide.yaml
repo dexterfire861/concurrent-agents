@@ -1,0 +1,108 @@
+# ADVERSARIAL. Structurally valid, schema-clean, and LYING.
+#
+# MUST BE REFUTED:  claims[0] = {kind: archetype, value: stag_hunt}
+# WITNESS MUST SHOW: the payoff-dominant equilibrium and the risk-dominant
+#   equilibrium are the SAME profile, (stag, stag). A stag hunt is defined by
+#   the tension between safety and reward; with no tension there is nothing to
+#   study. Plan section 6: "the safe one must differ from the good one. If they
+#   coincide, there's no dilemma — refuted."
+#
+# This is the hard case for a naive checker, because every OTHER stag-hunt test
+# passes. Compare against configs/golden/stag-hunt.yaml, which differs only in
+# T and P.
+#
+# Numbers: R=5, S=0, T=1, P=1.
+#
+#              stag       hare
+#      stag   (5, 5)    (0, 1)
+#      hare   (1, 0)    (1, 1)
+#
+# WHAT PASSES (so a checker that stops early gets it wrong):
+#   1. Ordering R > T >= P > S:  5 > 1 >= 1 > 0.  HOLDS.
+#   2. Exactly two pure Nash equilibria:
+#        (stag,stag): deviating pays T=1 < R=5   -> Nash
+#        (hare,hare): deviating pays S=0 < P=1   -> Nash
+#        (stag,hare): row has 0, deviates for 1  -> not Nash
+#        (hare,stag): symmetric                  -> not Nash
+#      HOLDS: exactly two.
+#   3. No dominant strategy:
+#        against stag: stag 5 > hare 1
+#        against hare: stag 0 < hare 1
+#      HOLDS: neither action dominates.
+#
+# WHAT FAILS (the only check that catches it):
+#   4. Risk dominance. For a symmetric 2x2, stag is risk-dominant iff
+#        (R - T) > (P - S).
+#      Here R - T = 5 - 1 = 4  and  P - S = 1 - 0 = 1.  4 > 1, so STAG is
+#      risk-dominant. Stag is ALSO payoff-dominant (5 > 1).
+#      => THEY COINCIDE. REFUTED.
+#
+#      Cross-check via the mixed equilibrium. Let p = Pr(other plays stag):
+#        stag: 5p          hare: p*1 + (1-p)*1 = 1
+#        5p = 1  =>  p* = 0.2
+#      You need only a 20% chance the other goes for the stag before stag is
+#      worth it, so stag owns 80% of the belief simplex. In the golden stag
+#      hunt p* = 0.75; anything below 0.5 means the payoff-dominant equilibrium
+#      is also the risk-dominant one.
+#
+# EXPECTED WITNESS SHAPE (content, not format):
+#   payoffDominant: (stag, stag);  riskDominant: (stag, stag);
+#   mixedThreshold: 0.2  (< 0.5, so the safe choice IS the good choice)
+# EXPECTED: at least one entry in `errors` is NOT required. This spec is
+#   well-formed. The refutation is a CLAIM verdict, which is the whole point:
+#   schema validity and truthfulness are different tiers.
+
+schemaVersion: "1"
+family: normal_form
+
+metadata:
+  id: adversarial-stag-hunt-equilibria-coincide
+  title: Stag hunt with no dilemma
+  sourceDescription: >
+    Two hunters choose between a stag and a hare. Going for the stag together
+    is much better, and the hare is barely worth catching.
+  tags: [adversarial, normal_form, stag_hunt, false_claim]
+
+seed: 20260906
+
+population:
+  size: 2
+  roles:
+    - id: row
+      share: 0.5
+      persona: "You are the first hunter."
+    - id: column
+      share: 0.5
+      persona: "You are the second hunter."
+
+actions:
+  kind: discrete
+  actions: [stag, hare]
+
+payoff:
+  kind: symmetric_2x2
+  R: 5
+  S: 0
+  T: 1
+  P: 1
+
+protocol:
+  regime: simultaneous
+  repetition:
+    rounds: 1
+    termination: fixed
+
+information:
+  observes: [own_action, own_payoff, full_profile]
+
+communication:
+  kind: none
+
+sweep:
+  axes: []
+  replicates: 1
+  maxCells: 1
+
+claims:
+  - kind: archetype
+    value: stag_hunt

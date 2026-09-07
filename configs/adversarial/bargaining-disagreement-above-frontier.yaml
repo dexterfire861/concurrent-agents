@@ -1,0 +1,115 @@
+# ADVERSARIAL. Structurally valid, schema-clean, and LYING.
+#
+# MUST BE REFUTED:  claims[0] = {kind: individually_rational}
+# WITNESS MUST SHOW: the disagreement point sums to MORE than the surplus, so
+#   no split leaves both sides at least as well off as walking away. There is
+#   literally nothing to bargain over. This is the vacuity check for the
+#   bargaining family — plan section 6: "Surplus > 0, and walking away must be
+#   worse than any deal. Otherwise there's nothing to bargain over."
+#
+# ALSO EXPECTED: at least one entry in `errors`. Unlike the other adversarial
+#   fixtures, this one is not merely making a false claim — the spec describes
+#   an empty problem, and plan section 6 lists that as a hard fail. The test
+#   asserts BOTH the error and the refuted verdict; see configs/README.md,
+#   "Errors and verdicts are independent".
+#
+# SETUP: surplus 100, disagreement {alpha: 60, beta: 60}, both discount
+# factors 0.5, alpha proposes first.
+#
+# WHAT PASSES:
+#   1. surplus = 100 > 0.  The naive "is the surplus positive" check passes.
+#   2. Both discount factors are strictly inside (0, 1), so the "no unique
+#      SPNE without discounting or a deadline" check passes.
+#   3. grid 0.01 divides the surplus evenly.
+#   4. Role shares sum to 1; two roles, one per side of the table.
+#   A checker that tests only "surplus > 0" confirms a vacuous scenario.
+#
+# WHAT FAILS:
+#   5. FEASIBILITY. The frontier is {(u1, u2) : u1 + u2 = 100, u1, u2 >= 0}.
+#      Individual rationality requires u1 >= 60 AND u2 >= 60, hence
+#        u1 + u2 >= 120  >  100 = the entire surplus.
+#      No point on or under the frontier satisfies both. The bargaining set is
+#      EMPTY. Every agreement makes at least one side worse off than walking
+#      away, so `individually_rational` is REFUTED with no computation beyond
+#      60 + 60 > 100.
+#
+#   6. Both benchmarks are undefined, and an evaluator must say so rather than
+#      print a number:
+#        Nash bargaining solution: maximise (u1 - 60)(u2 - 60) over the
+#          frontier. At least one factor is negative everywhere on it, so the
+#          maximand has no meaningful maximum. UNDEFINED.
+#        Kalai-Smorodinsky: the ideal point requires each side's best payoff
+#          SUBJECT TO the other reaching its disagreement value; alpha's best
+#          subject to u2 >= 60 is u1 = 40 < 60. UNDEFINED.
+#        Rubinstein: the formula (1 - d2)/(1 - d1*d2) = 0.5/0.75 = 2/3 still
+#          evaluates arithmetically, giving shares 66.67 / 33.33 — and beta's
+#          33.33 is below its walk-away value of 60, so beta rejects every
+#          offer forever and there is no agreement. THIS IS THE TRAP: the
+#          formula returns a plausible number for a problem that has no
+#          solution. An evaluator that reports 66.67/33.33 without the
+#          feasibility check has produced confident nonsense, which is the
+#          exact failure mode this corpus exists to catch.
+#      Both undefined benchmarks belong in `incompleteness`, not in `theory`.
+#
+# EXPECTED WITNESS SHAPE (content, not format):
+#   {surplus: 100, disagreement: {alpha: 60, beta: 60}, disagreementSum: 120,
+#    reason: disagreement point is outside the feasible set; bargaining set empty}
+# EXPECTED `errors`: at least one, naming the infeasible disagreement point.
+
+schemaVersion: "1"
+family: bargaining
+
+metadata:
+  id: adversarial-bargaining-disagreement-above-frontier
+  title: Bargaining with nothing to bargain over
+  sourceDescription: >
+    Two people split a hundred pounds. Each of them has a standing outside
+    offer worth sixty, and waiting is expensive.
+  tags: [adversarial, bargaining, vacuous, individually_rational, false_claim]
+
+seed: 20260906
+
+population:
+  size: 2
+  roles:
+    - id: alpha
+      share: 0.5
+      persona: "You make the first offer and have a good outside option."
+    - id: beta
+      share: 0.5
+      persona: "You respond first and have a good outside option."
+
+surplus: 100
+grid: 0.01
+
+offerProtocol:
+  kind: alternating_offer
+  proposerOrder: [alpha, beta]
+
+disagreement:
+  alpha: 60
+  beta: 60
+
+discount:
+  alpha: 0.5
+  beta: 0.5
+
+protocol:
+  regime: simultaneous
+  repetition:
+    rounds: 1
+    termination: fixed
+
+information:
+  observes: [own_action, own_payoff, history]
+
+communication:
+  kind: none
+
+sweep:
+  axes: []
+  replicates: 1
+  maxCells: 1
+
+claims:
+  - kind: individually_rational

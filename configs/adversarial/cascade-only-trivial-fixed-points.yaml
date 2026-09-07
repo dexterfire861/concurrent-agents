@@ -1,0 +1,126 @@
+# ADVERSARIAL. Structurally valid, schema-clean, and LYING.
+#
+# MUST BE REFUTED:  claims[0] = {kind: tipping_point_exists}
+# WITNESS MUST SHOW: the only fixed points are 0 and N = 20, both STABLE, and
+#   there is no unstable interior crossing. This is the cascade model that
+#   studies nothing. Plan section 6: "verify there's a settling point that
+#   isn't 'nobody' or 'everybody', AND that at least one crossing is unstable.
+#   A cascade model whose only outcomes are 0 and everyone studies nothing —
+#   this check kills a whole class of plausible-looking, vacuous generated
+#   specs."
+#
+# Compare configs/golden/granovetter-cascade.yaml, which has the interior
+# structure this one lacks. The only difference is the threshold distribution:
+# a HOMOGENEOUS population instead of a spread one.
+#
+# SETUP: N = 20, every agent's threshold is exactly 10 (a point distribution),
+# benefit 10, cost 1, outsideOption 0, statistic = count of `act`,
+# includesSelf: true.
+#
+# WHAT PASSES:
+#   1. Threshold 10 <= N = 20, so it is reachable — the unsatisfiability check
+#      does not catch this one.
+#   2. monotonicity: complement matches the sign. More actors weakly raises
+#      an actor's payoff, so the sign check does not catch it either.
+#   3. Two genuine equilibria exist, so "does an equilibrium exist" passes.
+#      Only the interior-and-unstable test catches it.
+#
+# WHAT FAILS:
+#   4. The cascade map is  G(x) = #{i : theta_i <= x}  = 0 for x < 10,
+#      20 for x >= 10.
+#        G(0..9)   = 0
+#        G(10..20) = 20
+#      Fixed points G(x) = x:
+#        x = 0        G(0) = 0    == 0    YES
+#        x = 1..9     G(x) = 0    != x    no
+#        x = 10..19   G(x) = 20   != x    no
+#        x = 20       G(20) = 20  == 20   YES
+#      => fixed points are EXACTLY {0, 20} = {nobody, everybody}.
+#
+#   5. Cross-check with the self-inclusion-corrected condition (the definition
+#      this repo uses), so the refutation does not hinge on which map you pick:
+#        x = 0:   a joiner makes the count 1, and 1 >= 10 is false, so nobody
+#                 wants in.                                    EQUILIBRIUM
+#        x = 20:  every actor sees 20 >= 10 and is content.    EQUILIBRIUM
+#        any 1 <= x <= 9:   the actors see x < 10, earn -1 < 0, and leave.
+#        any 10 <= x <= 19: a non-actor joining makes x+1 >= 11 >= 10 and
+#                           earns 9 > 0, so they want in.
+#      Same answer: {0, 20} only.
+#
+#   6. Stability:
+#        x = 0:  perturb to 1 -> G(1) = 0 -> returns to 0.   STABLE
+#        x = 20: perturb to 19 -> G(19) = 20 -> returns.     STABLE
+#      Both trivial fixed points are stable, so tippingPoints = [] and there is
+#      no unstable crossing anywhere. REFUTED.
+#      (The map does jump from 0 to 20 between x = 9 and x = 10, but a
+#       discontinuous jump is not a fixed point and cannot be reported as a
+#       tipping level. An evaluator that returns 9.5 or 10 here is inventing a
+#       number.)
+#
+# EXPECTED WITNESS SHAPE (content, not format):
+#   fixedPoints: [{level: 0, stable: true}, {level: 20, stable: true}]
+#   tippingPoints: []
+#   reason: only the trivial levels 0 and N are fixed points
+# EXPECTED `errors`: none required. Well-formed spec, false claim.
+
+schemaVersion: "1"
+family: aggregate
+
+metadata:
+  id: adversarial-cascade-only-trivial-fixed-points
+  title: Cascade with only trivial outcomes
+  sourceDescription: >
+    Twenty students decide whether to join a study group. Each will join once
+    half the class has joined. Nobody wants to be early.
+  tags: [adversarial, aggregate, cascade, tipping_point, false_claim]
+
+seed: 20260906
+
+population:
+  size: 20
+  roles:
+    - id: student
+      share: 1.0
+      persona: "You will join once about half the class already has."
+
+actions:
+  kind: discrete
+  actions: [act, abstain]
+
+statistic:
+  kind: count
+  of: act
+
+includesSelf: true
+
+payoff:
+  kind: threshold_binary
+  benefit: 10
+  cost: 1
+  outsideOption: 0
+  threshold:
+    kind: point
+    value: 10
+
+monotonicity: complement
+
+protocol:
+  regime: simultaneous
+  repetition:
+    rounds: 6
+    termination: fixed
+
+information:
+  observes: [own_action, own_payoff, aggregate_statistic]
+  lagRounds: 1
+
+communication:
+  kind: none
+
+sweep:
+  axes: []
+  replicates: 1
+  maxCells: 1
+
+claims:
+  - kind: tipping_point_exists

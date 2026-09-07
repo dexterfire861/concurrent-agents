@@ -1,0 +1,138 @@
+# GOLDEN. Closed-form, and the cheapest exact test in the whole system:
+# in a second-price sealed-bid auction, TRUTHFUL BIDDING HAS EXACTLY ZERO
+# EX-POST REGRET. Not approximately zero. Zero. If the evaluator reports any
+# other number, the evaluator is broken.
+#
+# Numbers: 3 bidders, private values drawn iid from {10, 20, 30} with equal
+# probability, bid grid {0, 10, 20, 30, 40}, no reserve, ties to lowest id.
+#
+# The bid grid covers the valuation range (max bid 40 > max value 30), which
+# plan section 6 requires: a grid that stopped below 30 would silently cap bids
+# and corrupt every efficiency number in the report.
+#
+# DERIVATION 1 -- WHY REGRET IS EXACTLY ZERO (general, then the fixture's case)
+#
+# Fix bidder i with value v_i, and let p = max over j != i of b_j — the highest
+# competing bid, which i does not control. Under the second-price rule:
+#     bid b:  i wins iff b > p (ties broken by id), and then pays p.
+#     utility(b) = v_i - p  if i wins,  else 0.
+# So over ALL possible bids b, the achievable utilities are exactly the two
+# values {0, v_i - p}, and:
+#     if v_i > p:  bidding v_i wins and yields v_i - p > 0, the maximum.
+#     if v_i < p:  bidding v_i loses and yields 0; any winning bid would yield
+#                  v_i - p < 0, so 0 is the maximum.
+#     if v_i = p:  both branches yield 0.
+# In every case truthful bidding attains max(v_i - p, 0), which is the best
+# attainable over the whole bid space. Therefore
+#     ex-post regret of truthful bidding = 0, EXACTLY, for every bidder, for
+#     every realization of others' bids.
+# This also proves truthfulness is a weakly dominant strategy, so
+#     `dsic` CONFIRMED  and  `individually_rational` CONFIRMED
+# (utility is max(v_i - p, 0) >= 0, so nobody is worse off for playing).
+#
+# DERIVATION 2 -- THE CONCRETE TRACE the test builds (values 30, 20, 10)
+#   bids = values = (b0, b1, b2) = (30, 20, 10)
+#   winner: a0 (highest bid 30). Price = second-highest bid = 20.
+#   utilities: a0 = 30 - 20 = 10;  a1 = 0;  a2 = 0.
+#
+#   a0 (v = 30, p = max(20, 10) = 20):
+#       best attainable = max(30 - 20, 0) = 10.  Achieved 10.  REGRET 0.
+#       (bidding 30 or 40 both win at price 20; bidding 20 or below loses -> 0.)
+#   a1 (v = 20, p = max(30, 10) = 30):
+#       best attainable = max(20 - 30, 0) = 0.   Achieved 0.   REGRET 0.
+#       (the only way to win is to bid above 30, which pays 30 for something
+#        worth 20: utility -10. Losing is better.)
+#   a2 (v = 10, p = max(30, 20) = 30):
+#       best attainable = max(10 - 30, 0) = 0.   Achieved 0.   REGRET 0.
+#   => every regret is exactly 0.
+#
+#   Realized revenue = 20. Allocation is efficient: the highest-value bidder won.
+#
+# DERIVATION 3 -- EXPECTED REVENUE (spec alone, iid uniform on {10,20,30}, n=3)
+#   Revenue = the second-highest of three iid draws, X_(2).
+#   With q_t = Pr(X >= t):
+#     Pr(X_(2) >= 20) = Pr(at least 2 of 3 draws >= 20), q = 2/3
+#                     = C(3,2)(2/3)^2(1/3) + (2/3)^3
+#                     = 3 * (4/9) * (1/3) + 8/27 = 12/27 + 8/27 = 20/27
+#     Pr(X_(2) >= 30) = Pr(at least 2 of 3 draws >= 30), q = 1/3
+#                     = 3 * (1/9) * (2/3) + (1/27) = 6/27 + 1/27 = 7/27
+#   Since the support is {10, 20, 30} with step 10 and minimum 10:
+#     E[X_(2)] = 10 + 10 * Pr(X_(2) >= 20) + 10 * Pr(X_(2) >= 30)
+#              = 10 + 10*(20/27) + 10*(7/27)
+#              = 10 + (200 + 70)/27
+#              = 10 + 270/27 = 10 + 10 = 20.
+#   => expectedRevenue = 20 exactly.
+#   Allocative efficiency under truthful bidding is 1.0: the highest value
+#   always wins (ties are between equal values, so welfare is unaffected).
+#
+# EXPECTED THEORY BLOCK
+#   family:              mechanism
+#   equilibriumBid:      truthful
+#   dsicVerified:        true
+#   expectedRevenue:     20
+#   expectedEfficiency:  1
+#   individuallyRational: true
+# EXPECTED MEASURED BLOCK (on the truthful trace above)
+#   every agent's regret value = 0, EXACTLY.
+# EXPECTED VERDICTS: dsic CONFIRMED, individually_rational CONFIRMED.
+# Tolerance: 1e-9 for expectedRevenue; the regrets must be exactly 0.
+
+schemaVersion: "1"
+family: mechanism
+
+metadata:
+  id: golden-second-price-auction
+  title: Second-price sealed-bid auction
+  sourceDescription: >
+    Three people bid for one item in sealed envelopes. The highest bidder wins
+    but pays only what the second-highest bidder offered.
+  tags: [golden, mechanism, auction, second_price, dsic, zero_regret]
+
+seed: 20260906
+
+population:
+  size: 3
+  roles:
+    - id: bidder
+      share: 1.0
+      persona: "You want the item and know privately what it is worth to you."
+
+report:
+  kind: bid
+  space:
+    kind: discrete
+    actions: ["0", "10", "20", "30", "40"]
+
+valuation:
+  kind: private_value
+  dist:
+    kind: empirical
+    values: [10, 20, 30]
+    weights: [0.3333333333333333, 0.3333333333333333, 0.3333333333333333]
+
+rule:
+  kind: second_price
+
+transfers: monetary
+tieBreak: lowest_id
+
+protocol:
+  regime: simultaneous
+  repetition:
+    rounds: 1
+    termination: fixed
+
+information:
+  observes: [own_action, own_payoff, own_type, mechanism_outcome]
+
+communication:
+  kind: none
+
+sweep:
+  axes: []
+  replicates: 1
+  maxCells: 1
+
+claims:
+  - kind: dsic
+  - kind: individually_rational

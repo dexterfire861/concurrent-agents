@@ -1,0 +1,76 @@
+# Worked example: payoff depends on how many people show up, not on who.
+#
+# Theory the evaluator derives on its own (at capacity 8):
+#   attending pays 10 - 1.5 * (turnout - 8); skipping always pays 3
+#   equilibrium turnout = 12  (at 12 each attendee gets 4 > 3, so nobody leaves;
+#                              a 13th would drop everyone to 2.5 < 3, so nobody joins)
+#   efficient turnout   = 8   (total welfare 146, vs 102 at the equilibrium)
+#   => claim `social_dilemma` is CONFIRMED
+#
+# Nothing below is hand-typed theory. The numbers above are what the evaluator
+# must reproduce from this file alone.
+
+schemaVersion: "1"
+family: aggregate
+
+metadata:
+  id: office-hours-crowding
+  title: Office hours with crowding
+  sourceDescription: >
+    30 students decide whether to go to office hours. It's useful if it isn't
+    packed, but past about 8 people the TA can't get to everyone.
+  tags: [congestion, coordination, classroom]
+
+seed: 20260905
+
+population:
+  size: 30
+  roles:
+    - id: struggling
+      share: 0.4
+      persona: "You're behind in the class and need help urgently."
+    - id: comfortable
+      share: 0.6
+      persona: "You're doing fine but could use some clarification."
+
+actions:
+  kind: discrete
+  actions: [attend, skip]
+
+statistic:
+  kind: count
+  of: attend
+
+# I am counted in the crowd, so ex-post regret must recompute the headcount
+# without me. Written explicitly: a default here is silently wrong at the margin.
+includesSelf: true
+
+payoff:
+  kind: congestion
+  capacity: { min: 4, max: 12, steps: 5 }   # a range => this one file is 5 experiments
+  valueUnderCapacity: 10
+  slopeOver: -1.5
+  outsideOption: 3
+
+monotonicity: substitute   # more people is worse; validator checks the sign
+
+protocol:
+  regime: simultaneous
+  repetition:
+    rounds: 5
+    termination: fixed
+
+information:
+  observes: [own_action, own_payoff, aggregate_statistic]
+  lagRounds: 1             # you see last round's turnout, not this round's
+
+communication:
+  kind: none
+
+sweep:
+  axes: ["/payoff/capacity"]
+  replicates: 3            # 5 settings x 3 replicates = 15 runs
+  maxCells: 100
+
+claims:
+  - kind: social_dilemma

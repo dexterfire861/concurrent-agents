@@ -1,0 +1,137 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Table</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,620&family=Source+Sans+3:wght@400;560;700&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="/styles.css?v=12" />
+  </head>
+  <body>
+    <div class="room" id="room">
+      <header class="mast">
+        <p class="brand">Table</p>
+        <p class="clock" id="clock">Waiting</p>
+      </header>
+
+      <section class="panel hidden" id="inspect">
+        <p class="kicker">The payoffs</p>
+        <h1 class="panel-title" id="inspect-title"></h1>
+        <p class="panel-lead" id="inspect-premise"></p>
+        <p class="scene-q" id="inspect-question"></p>
+        <p class="kicker">Who is sitting</p>
+        <ul class="who" id="inspect-who"></ul>
+        <div id="inspect-payoffs"></div>
+        <p class="textbook-line" id="inspect-textbook"></p>
+        <div class="actions">
+          <button type="button" id="sit">Sit them down</button>
+          <button type="button" class="ghost" id="inspect-back">Back</button>
+        </div>
+      </section>
+
+      <main class="stage" id="stage">
+        <section class="table-wrap" aria-label="The table">
+          <div class="table" id="table">
+            <div class="felt"></div>
+            <div class="center" id="center">
+              <form class="place" id="form">
+                <label for="scenario">What is happening</label>
+                <textarea
+                  id="scenario"
+                  name="scenario"
+                  rows="5"
+                  required
+                  minlength="8"
+                  placeholder="Sunday night. Four roommates. The landlord just texted about the noise. One of them wants the party to keep going."
+                ></textarea>
+                <div class="actions">
+                  <button type="submit" id="start">Sit them down</button>
+                  <button type="button" class="ghost" id="sample">Use an example</button>
+                </div>
+              </form>
+              <div class="scene hidden" id="scene" aria-live="polite">
+                <p class="scene-title" id="scene-title"></p>
+                <p class="scene-q" id="scene-q"></p>
+              </div>
+            </div>
+          </div>
+          <div class="known" id="known">
+            <p class="kicker">Or sit a known game</p>
+            <ul class="games" id="games">
+              <li>
+                <button type="button" data-game="golden-prisoners-dilemma">
+                  Prisoner's dilemma
+                  <small>Two suspects. Talking is safer for you; both talking is worse for both.</small>
+                </button>
+              </li>
+              <li>
+                <button type="button" data-game="golden-stag-hunt">
+                  Stag hunt
+                  <small>Two hunters. A stag feeds both — only if both commit. A hare is certain.</small>
+                </button>
+              </li>
+              <li>
+                <button type="button" data-game="golden-chicken">
+                  Chicken
+                  <small>Two drivers. Swerve and lose face, or hold and risk a crash.</small>
+                </button>
+              </li>
+              <li>
+                <button type="button" data-game="golden-congestion-office-hours">
+                  Office hours with crowding
+                  <small>Office hours help until the room is packed. That is why people skip.</small>
+                </button>
+              </li>
+              <li>
+                <button type="button" data-game="golden-linear-public-good">
+                  A common pot
+                  <small>Four people and a common pot. Putting tokens in helps everyone; keeping them helps you.</small>
+                </button>
+              </li>
+            </ul>
+          </div>
+        </section>
+
+        <aside class="rail" id="rail" hidden>
+          <p class="kicker" id="title"></p>
+          <p class="premise" id="premise"></p>
+          <ol class="log" id="log"></ol>
+          <div class="play-end hidden" id="play-end">
+            <button type="button" class="hidden" id="see-results">See results</button>
+            <button type="button" class="ghost hidden" id="another">Another game</button>
+            <div class="free-end hidden" id="free-end">
+              <p class="flag" id="free-flag"></p>
+              <p class="outcome" id="free-outcome"></p>
+              <ul class="tally" id="free-tally"></ul>
+              <p class="reading" id="free-reading"></p>
+              <div class="notes" id="free-notes"></div>
+              <button type="button" class="ghost" id="again">Another situation</button>
+            </div>
+          </div>
+        </aside>
+      </main>
+
+      <section class="panel hidden" id="results">
+        <p class="flag" id="flag"></p>
+        <p class="outcome" id="outcome"></p>
+        <ul class="tally" id="tally"></ul>
+        <div class="textbook hidden" id="textbook">
+          <p class="kicker">Textbook</p>
+          <div id="theory"></div>
+          <p class="versus" id="versus"></p>
+        </div>
+        <div class="notes" id="notes"></div>
+        <div class="actions">
+          <button type="button" class="ghost" id="back-table">Back to table</button>
+          <button type="button" class="ghost" id="another-results">Another game</button>
+        </div>
+      </section>
+    </div>
+    <script src="/app.js?v=12"></script>
+  </body>
+</html>

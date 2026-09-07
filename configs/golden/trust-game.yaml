@@ -1,0 +1,144 @@
+# GOLDEN. Closed-form. Trust (investment) game, SPNE by backward induction.
+# The SPNE is Pareto-dominated by the cooperative leaf, so this is also an
+# unambiguous `social_dilemma` — unlike the congestion fixture, which is only
+# welfare-inefficient.
+#
+# Explicit tree rather than `template`, for the same reason as the ultimatum
+# fixture: the template `params` shape is not pinned by the types.
+#
+# SETUP. The investor holds 10. It may KEEP or SEND everything. Anything sent
+# is TRIPLED, so the trustee receives 30 and may RETURN half of it (15) or
+# DEFECT and keep all 30. Choices are coarse on purpose: no ties anywhere.
+#
+#   root    : investor chooses keep / send
+#   t_keep  = (investor 10, trustee 0)
+#   n_send  : trustee chooses return / defect
+#   t_ret   = (investor 15, trustee 15)      investor keeps 0, gets 15 back
+#   t_def   = (investor 0,  trustee 30)      investor keeps 0, gets nothing back
+#
+# DERIVATION (backward induction, leaves first)
+#
+# 1. Information set it0 (the trustee, holding 30):
+#       return -> 15,  defect -> 30.   30 > 15  =>  DEFECT.  Strict.
+# 2. Information set ii0 (the investor, folding that back):
+#       send -> trustee defects -> investor gets 0
+#       keep -> investor gets 10
+#       10 > 0  =>  KEEP.  Strict.
+#
+# 3. SPNE = { ii0: keep, it0: defect }.
+#    Equilibrium path: the investor keeps; the tree stops at t_keep.
+#    Equilibrium payoffs: investor 10, trustee 0.
+#
+# 4. SOCIAL DILEMMA -- and here the Pareto reading and the welfare reading
+#    AGREE, which is why this fixture claims it and the congestion one is
+#    flagged as the ambiguous case.
+#      equilibrium leaf t_keep = (10, 0)
+#      cooperative leaf t_ret  = (15, 15)
+#      15 > 10 for the investor AND 15 > 0 for the trustee: STRICTLY better for
+#      both. The equilibrium is Pareto-dominated.
+#      Welfare: 10 at the equilibrium vs 30 at t_ret. Gap = 20.
+#    => `social_dilemma` CONFIRMED.
+#
+# 5. CREDIBILITY. "I will return half" is the trustee's promise and it is NOT
+#    credible: returning costs the trustee 15. That non-credibility is the
+#    entire game — it is why the investor never sends, and it is the wedge
+#    between the theory (10, 0) and what people actually do.
+#      credibility = [ {infoset: it0, threat: return, credible: false} ]
+#    (`threat` is the field name in SequentialTheory; here the off-path move
+#     happens to be a promise rather than a threat. Noted in the final report
+#     as a naming issue, not changed.)
+#
+# 6. PERFECT RECALL. Two singleton information sets, one move each per player,
+#    each information set with a single owner and a single move set. HOLDS.
+#
+# 7. Tree is acyclic; every node reachable from `root`; every leaf pays both
+#    roles; no chance nodes.
+#
+# EXPECTED THEORY BLOCK
+#   family:             sequential
+#   spne:               {ii0: keep, it0: defect}
+#   equilibriumPayoffs: {investor: 10, trustee: 0}
+#   credibility:        [{infoset: it0, threat: return, credible: false}]
+#   perfectRecall:      true
+# EXPECTED VERDICTS: archetype trust CONFIRMED, social_dilemma CONFIRMED.
+# Tolerance: 1e-9 (exact integers).
+
+schemaVersion: "1"
+family: sequential
+
+metadata:
+  id: golden-trust-game
+  title: Trust game
+  sourceDescription: >
+    One person can hand over ten pounds, which triples on the way. The person
+    receiving it can send half back or keep the lot. There is no contract.
+  tags: [golden, sequential, trust, backward_induction, social_dilemma]
+
+seed: 20260906
+
+population:
+  size: 2
+  roles:
+    - id: investor
+      share: 0.5
+      persona: "You decide whether to hand your money to someone you cannot hold to anything."
+    - id: trustee
+      share: 0.5
+      persona: "Money has been handed to you. You decide whether to send any back."
+
+tree:
+  kind: explicit
+  root: root
+  nodes:
+    root:
+      kind: decision
+      owner: investor
+      infoset: ii0
+      moves:
+        keep: t_keep
+        send: n_send
+    t_keep:
+      kind: terminal
+      payoffs: { investor: 10, trustee: 0 }
+    n_send:
+      kind: decision
+      owner: trustee
+      infoset: it0
+      moves:
+        return: t_ret
+        defect: t_def
+    t_ret:
+      kind: terminal
+      payoffs: { investor: 15, trustee: 15 }
+    t_def:
+      kind: terminal
+      payoffs: { investor: 0, trustee: 30 }
+  infosets:
+    - id: ii0
+      owner: investor
+      nodes: [root]
+    - id: it0
+      owner: trustee
+      nodes: [n_send]
+
+protocol:
+  regime: simultaneous
+  repetition:
+    rounds: 1
+    termination: fixed
+
+information:
+  observes: [own_action, own_payoff, history]
+
+communication:
+  kind: none
+
+sweep:
+  axes: []
+  replicates: 1
+  maxCells: 1
+
+claims:
+  - kind: archetype
+    value: trust
+  - kind: social_dilemma

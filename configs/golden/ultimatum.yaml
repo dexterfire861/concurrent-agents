@@ -1,0 +1,152 @@
+# GOLDEN. Closed-form. Ultimatum game, SPNE by backward induction.
+#
+# The tree is written EXPLICITLY rather than as a `template`, because the
+# template variant's `params` shape is not pinned by the types and a fixture
+# whose numbers depend on an unstated parameter convention is not a golden.
+#
+# SETUP. A pie of 10, offers restricted to {2, 5} (a coarse grid ON PURPOSE:
+# it removes every payoff tie, so the SPNE is unique with no tie-breaking
+# convention needed). Rejection pays both zero.
+#
+#   root  : proposer chooses offer2 or offer5
+#   n2    : responder chooses accept / reject after an offer of 2
+#   n5    : responder chooses accept / reject after an offer of 5
+#   t2a = (proposer 8, responder 2)   t2r = (0, 0)
+#   t5a = (proposer 5, responder 5)   t5r = (0, 0)
+#
+# The responder's two nodes sit in TWO DIFFERENT singleton information sets
+# (ir2, ir5), which is what "the responder sees the offer" means formally.
+#
+# DERIVATION (backward induction, leaves first)
+#
+# 1. Information set ir2 (an offer of 2 is on the table):
+#       accept -> 2,  reject -> 0.   2 > 0  =>  ACCEPT.
+#    Strict, no tie.
+# 2. Information set ir5 (an offer of 5 is on the table):
+#       accept -> 5,  reject -> 0.   5 > 0  =>  ACCEPT.
+#    Strict, no tie.
+# 3. Information set ip0 (the proposer, folding the above back):
+#       offer2 -> responder accepts -> proposer gets 8
+#       offer5 -> responder accepts -> proposer gets 5
+#       8 > 5  =>  OFFER2.  Strict, no tie.
+#
+# 4. SPNE = { ip0: offer2, ir2: accept, ir5: accept }.
+#    Equilibrium path: offer 2, accepted.
+#    Equilibrium payoffs: proposer 8, responder 2.
+#
+# 5. CREDIBILITY. "Reject a positive offer" is the responder's threat, and it
+#    is NOT credible at either information set: rejecting costs the responder 2
+#    at ir2 and 5 at ir5, in both cases strictly worse than accepting. This is
+#    exactly the gap between what the theory predicts (8/2) and what humans
+#    actually do, which is the point of running the scenario at all.
+#      credibility = [ {infoset: ir2, threat: reject, credible: false},
+#                      {infoset: ir5, threat: reject, credible: false} ]
+#
+# 6. PERFECT RECALL. The proposer moves once. The responder's information sets
+#    are singletons, so it never forgets anything. Every information set has a
+#    single owner and a single move set {accept, reject}. Perfect recall HOLDS.
+#
+# 7. Every leaf carries a payoff for both roles; every move points at a real
+#    node; the tree is acyclic and every node is reachable from `root`. There
+#    are no chance nodes, so the "chance probabilities sum to 1" rule is vacuous.
+#
+# EXPECTED THEORY BLOCK
+#   family:             sequential
+#   spne:               {ip0: offer2, ir2: accept, ir5: accept}
+#   equilibriumPayoffs: {proposer: 8, responder: 2}
+#   credibility:        both entries credible: false
+#   perfectRecall:      true
+# EXPECTED VERDICTS: archetype ultimatum CONFIRMED.
+# Tolerance: 1e-9 (exact integers).
+
+schemaVersion: "1"
+family: sequential
+
+metadata:
+  id: golden-ultimatum
+  title: Ultimatum game
+  sourceDescription: >
+    One person proposes how to split ten pounds. The other can take the offer
+    or turn it down, in which case nobody gets anything.
+  tags: [golden, sequential, ultimatum, backward_induction, credibility]
+
+seed: 20260906
+
+population:
+  size: 2
+  roles:
+    - id: proposer
+      share: 0.5
+      persona: "You decide how to split the money and make a single offer."
+    - id: responder
+      share: 0.5
+      persona: "You see the offer and decide whether to take it."
+
+tree:
+  kind: explicit
+  root: root
+  nodes:
+    root:
+      kind: decision
+      owner: proposer
+      infoset: ip0
+      moves:
+        offer2: n2
+        offer5: n5
+    n2:
+      kind: decision
+      owner: responder
+      infoset: ir2
+      moves:
+        accept: t2a
+        reject: t2r
+    n5:
+      kind: decision
+      owner: responder
+      infoset: ir5
+      moves:
+        accept: t5a
+        reject: t5r
+    t2a:
+      kind: terminal
+      payoffs: { proposer: 8, responder: 2 }
+    t2r:
+      kind: terminal
+      payoffs: { proposer: 0, responder: 0 }
+    t5a:
+      kind: terminal
+      payoffs: { proposer: 5, responder: 5 }
+    t5r:
+      kind: terminal
+      payoffs: { proposer: 0, responder: 0 }
+  infosets:
+    - id: ip0
+      owner: proposer
+      nodes: [root]
+    - id: ir2
+      owner: responder
+      nodes: [n2]
+    - id: ir5
+      owner: responder
+      nodes: [n5]
+
+protocol:
+  regime: simultaneous
+  repetition:
+    rounds: 1
+    termination: fixed
+
+information:
+  observes: [own_action, own_payoff, history]
+
+communication:
+  kind: none
+
+sweep:
+  axes: []
+  replicates: 1
+  maxCells: 1
+
+claims:
+  - kind: archetype
+    value: ultimatum

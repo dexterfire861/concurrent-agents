@@ -1,0 +1,123 @@
+# GOLDEN. Closed-form. Stag hunt: the payoff-dominant equilibrium is NOT the
+# risk-dominant one. That gap is the whole game; the adversarial twin
+# (configs/adversarial/stag-hunt-equilibria-coincide.yaml) removes it.
+#
+# CONVENTION: first action label = "cooperate" (stag), second = "defect" (hare).
+#   R = both stag, S = I stag & they hare, T = I hare & they stag, P = both hare.
+#
+# Numbers: R=5, S=0, T=4, P=3.
+#
+# DERIVATION
+#
+# The 2x2 table (row, column):
+#              stag       hare
+#      stag   (5, 5)    (0, 4)
+#      hare   (4, 0)    (3, 3)
+#
+# 1. Ordering. Stag hunt requires R > T >= P > S  =>  5 > 4 >= 3 > 0.  Holds.
+#
+# 2. Exactly two pure Nash equilibria.
+#      (stag,stag): deviating to hare pays T=4 < R=5   -> Nash
+#      (hare,hare): deviating to stag pays S=0 < P=3   -> Nash
+#      (stag,hare): row has S=0, deviates to hare for P=3  -> not Nash
+#      (hare,stag): symmetric                              -> not Nash
+#    => pureNash has exactly 2 entries.
+#
+# 3. NO dominant strategy (this is what separates a stag hunt from a PD).
+#      against stag: stag pays 5 > hare pays 4  -> stag better
+#      against hare: stag pays 0 < hare pays 3  -> hare better
+#    => dominant = {row: null, column: null}.
+#
+# 4. Payoff-dominant equilibrium = (stag, stag), since 5 > 3 for both.
+#
+# 5. Risk-dominant equilibrium.  For a symmetric 2x2, stag is risk-dominant iff
+#    (R - T) > (P - S).  Here  R - T = 5 - 4 = 1  and  P - S = 3 - 0 = 3.
+#    1 < 3, so HARE is risk-dominant.
+#    Cross-check via the mixed equilibrium's basin. Let p = Pr(opponent plays
+#    stag). Indifference:
+#        stag: p*R + (1-p)*S = 5p
+#        hare: p*T + (1-p)*P = 4p + 3(1-p) = 3 + p
+#        5p = 3 + p  =>  4p = 3  =>  p* = 0.75
+#    You must believe the other plays stag with probability above 0.75 before
+#    stag is worth it, so hare owns 75% of the belief simplex: hare is
+#    risk-dominant, and p* = 0.75 > 0.5 confirms it.
+#    => PAYOFF-DOMINANT (stag,stag) != RISK-DOMINANT (hare,hare).  The dilemma
+#       is real, so `archetype: stag_hunt` is CONFIRMED.
+#
+# 6. Mixed Nash: both play stag with probability 0.75, hare with 0.25.
+#    Expected payoff = 5 * 0.75 = 3.75 for each.
+#
+# 7. Pareto frontier. Welfare: (stag,stag)=10, (stag,hare)=4, (hare,stag)=4,
+#    (hare,hare)=6.  (5,5) strictly dominates every other cell componentwise,
+#    so the frontier is the single profile {(stag,stag)}.
+#
+# 8. Price of anarchy = best welfare / worst-equilibrium welfare = 10 / 6
+#      = 1.6666666666666667  (5/3).
+#    Price of stability = 10 / 10 = 1 (the good equilibrium is available).
+#
+# EXPECTED THEORY BLOCK
+#   pureNash:          exactly 2 profiles: (stag,stag) and (hare,hare)
+#   mixedNash:         one, stag with probability 0.75 for both roles
+#   dominant:          {row: null, column: null}
+#   paretoFrontier:    exactly 1 profile, (stag,stag)
+#   priceOfAnarchy:    5/3 = 1.666666666666667
+#   priceOfStability:  1
+#   archetypeDetected: stag_hunt
+# EXPECTED VERDICTS: archetype stag_hunt CONFIRMED.
+# Tolerance: 1e-9.
+
+schemaVersion: "1"
+family: normal_form
+
+metadata:
+  id: golden-stag-hunt
+  title: Stag hunt
+  sourceDescription: >
+    Two hunters. Together they can take a stag, which feeds both well, but
+    only if both commit. Alone, either can take a hare, which is smaller but
+    certain. Going for the stag alone gets you nothing.
+  tags: [golden, normal_form, stag_hunt, coordination, risk_dominance]
+
+seed: 20260906
+
+population:
+  size: 2
+  roles:
+    - id: row
+      share: 0.5
+      persona: "You are the first hunter. You cannot see what the other chose."
+    - id: column
+      share: 0.5
+      persona: "You are the second hunter. You cannot see what the other chose."
+
+actions:
+  kind: discrete
+  actions: [stag, hare]
+
+payoff:
+  kind: symmetric_2x2
+  R: 5
+  S: 0
+  T: 4
+  P: 3
+
+protocol:
+  regime: simultaneous
+  repetition:
+    rounds: 1
+    termination: fixed
+
+information:
+  observes: [own_action, own_payoff, full_profile]
+
+communication:
+  kind: none
+
+sweep:
+  axes: []
+  replicates: 1
+  maxCells: 1
+
+claims:
+  - kind: archetype
+    value: stag_hunt

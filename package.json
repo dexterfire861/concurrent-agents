@@ -1,0 +1,34 @@
+{
+  "name": "concurrent-agents",
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "start": "tsx src/demo/server.ts",
+    "play": "tsx src/demo/play.ts",
+    "typecheck": "tsc --noEmit",
+    "test": "node --import tsx --test test/*.test.ts",
+    "eval": "tsx src/cli.ts"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/dexterfire861/concurrent-agents.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/dexterfire861/concurrent-agents/issues"
+  },
+  "homepage": "https://github.com/dexterfire861/concurrent-agents#readme",
+  "description": "A table of agents. They talk. A frozen spec scores them against the textbook.",
+  "dependencies": {
+    "@mozaik-ai/core": "^4.0.5",
+    "dotenv": "^17.4.2",
+    "yaml": "^2.9.0"
+  },
+  "devDependencies": {
+    "@types/node": "^26.4.1",
+    "tsx": "^4.23.13",
+    "typescript": "^7.0.2"
+  }
+}

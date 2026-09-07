@@ -1,0 +1,132 @@
+# GOLDEN. Closed-form. Linear public goods game: the free-riding equilibrium
+# sits strictly below the efficient contribution level.
+#
+# SEMANTICS of `linear_public_good`, from the FORMULA comment on
+# AggregatePayoff in src/spec/types.ts:  u_i = (E - c_i) + m * C, where C is
+# the sum of contributions over all N. Actions are binary here: contribute the
+# whole endowment or keep it. With k = the number of contributors (statistic =
+# count of `contribute`, includesSelf: true) this reads:
+#     payoff(contribute) = m * k * E
+#     payoff(keep)       = E + m * k * E
+# Equivalently payoff_i = (E - c_i) + m * E * k with c_i in {0, E}.
+#
+# Numbers: N = 4, E = 20, m = 0.5.
+# The dilemma condition from the type comment is 1/N < m < 1:
+#     1/4 = 0.25 < 0.5 < 1.  Holds.
+#
+# DERIVATION
+#
+# 1. KEEPING IS STRICTLY DOMINANT. Take any fixed behaviour by the other three
+#    and let j = how many of THEM contribute. Then
+#       keep       -> 20 + 0.5 * 20 * j        = 20 + 10j
+#       contribute -> 0  + 0.5 * 20 * (j + 1)  = 10j + 10
+#    Difference (keep - contribute) = 20 + 10j - 10j - 10 = +10, for every
+#    j in {0,1,2,3}. Strictly positive and independent of j, so keeping is a
+#    STRICTLY dominant strategy. Contributing 20 buys you back only
+#    0.5 * 20 = 10 of it.
+#    => `dominant_strategy {all, keep, strict: true}` CONFIRMED.
+#
+# 2. EQUILIBRIUM LEVEL = 0 contributors.
+#    G(x) = number who best-respond by contributing when x others contribute
+#         = 0 for every x, because keeping is dominant.
+#    Unique fixed point x* = 0, and it is stable (G(1) = 0 returns to 0).
+#    Payoff at the equilibrium: everyone keeps, k = 0, each gets
+#       20 + 0.5 * 20 * 0 = 20.
+#    Equilibrium welfare = 4 * 20 = 80.
+#
+# 3. EFFICIENT LEVEL = 4 contributors.
+#    Welfare at k contributors:
+#       W(k) = k * (m*k*E) + (N - k) * (E + m*k*E)
+#            = k * 10k + (4 - k) * (20 + 10k)
+#       W(0) = 0            + 4 * 20        = 80
+#       W(1) = 1*10         + 3 * 30        = 10 + 90  = 100
+#       W(2) = 2*20         + 2 * 40        = 40 + 80  = 120
+#       W(3) = 3*30         + 1 * 50        = 90 + 50  = 140
+#       W(4) = 4*40         + 0             = 160
+#    Monotone increasing, maximum at k = 4 with welfare 160.
+#    (Sanity: each contribution adds N*m*E - E = 4*0.5*20 - 20 = +20 to
+#     welfare, matching the constant step of 20 above.)
+#
+# 4. WELFARE GAP = 160 - 80 = 80.
+#
+# 5. SOCIAL DILEMMA. At k=0 everyone gets 20; at k=4 everyone gets 40. Every
+#    agent is STRICTLY better off at the efficient profile, so the equilibrium
+#    is Pareto-dominated in the strong sense.
+#    => `social_dilemma` CONFIRMED under either reading (Pareto or welfare).
+#
+# 6. Monotonicity: each extra contributor adds m*E = 10 to everybody's payoff,
+#    so more participation helps => `complement`. Sign check passes.
+#
+# EXPECTED THEORY BLOCK
+#   family:               aggregate
+#   fixedPoints:          [{level: 0, stable: true}]        (exactly one)
+#   tippingPoints:        []                                (empty)
+#   equilibriumLevel:     0
+#   efficientLevel:       4
+#   welfareGap:           80
+#   monotonicityVerified: complement
+# EXPECTED VERDICTS: social_dilemma CONFIRMED, dominant_strategy CONFIRMED.
+# Tolerance: 1e-9 (exact integers).
+
+schemaVersion: "1"
+family: aggregate
+
+metadata:
+  id: golden-linear-public-good
+  title: Linear public goods game
+  sourceDescription: >
+    Four people each hold twenty tokens. Anything put into the common pot is
+    doubled and split four ways. Everyone is better off if all four contribute,
+    but each individual keeps more by holding on to their tokens.
+  tags: [golden, aggregate, public_goods, free_riding, social_dilemma]
+
+seed: 20260906
+
+population:
+  size: 4
+  roles:
+    - id: member
+      share: 1.0
+      persona: "You hold twenty tokens and decide whether to put them in the pot."
+
+actions:
+  kind: discrete
+  actions: [contribute, keep]
+
+statistic:
+  kind: count
+  of: contribute
+
+# My own contribution is inside the count that pays me back.
+includesSelf: true
+
+payoff:
+  kind: linear_public_good
+  endowment: 20
+  mpcr: 0.5
+
+monotonicity: complement
+
+protocol:
+  regime: simultaneous
+  repetition:
+    rounds: 1
+    termination: fixed
+
+information:
+  observes: [own_action, own_payoff, aggregate_statistic]
+
+communication:
+  kind: none
+
+sweep:
+  axes: []
+  replicates: 1
+  maxCells: 1
+
+claims:
+  - kind: social_dilemma
+  - kind: dominant_strategy
+    role: all
+    action: keep
+    strict: true
