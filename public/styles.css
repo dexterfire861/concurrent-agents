@@ -125,6 +125,13 @@ body {
   color: var(--mute);
 }
 
+.picked {
+  margin: -0.2rem 0 0.5rem;
+  font-family: Fraunces, serif;
+  font-size: 0.95rem;
+  color: var(--ink);
+}
+
 textarea {
   width: 100%;
   resize: vertical;

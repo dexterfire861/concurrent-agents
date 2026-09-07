@@ -6,6 +6,7 @@ const form = document.querySelector("#form");
 const scenario = document.querySelector("#scenario");
 const start = document.querySelector("#start");
 const sample = document.querySelector("#sample");
+const picked = document.querySelector("#picked");
 const table = document.querySelector("#table");
 const scene = document.querySelector("#scene");
 const sceneTitle = document.querySelector("#scene-title");
@@ -48,11 +49,23 @@ const another = document.querySelector("#another");
 const anotherResults = document.querySelector("#another-results");
 const known = document.querySelector("#known");
 
+// Used until situations.json loads, and kept as the fallback if it never does.
 const EXAMPLES = [
-  SAMPLE,
-  "A kitchen at 1am. Three founders. A $40 million acquisition offer expires tomorrow morning. Two want to take the money. The CTO wants to keep building.",
-  "Sunday night. Four roommates in a walk-up. The landlord just texted about the noise. One of them wants the party to keep going. Someone has work at seven.",
+  { title: "Office hours, last fifteen minutes", premise: SAMPLE },
+  {
+    title: "A kitchen at 1am",
+    premise:
+      "A kitchen at 1am. Three founders. A $40 million acquisition offer expires tomorrow morning. Two want to take the money. The CTO wants to keep building.",
+  },
+  {
+    title: "Sunday night in a walk-up",
+    premise:
+      "Sunday night. Four roommates in a walk-up. The landlord just texted about the noise. One of them wants the party to keep going. Someone has work at seven.",
+  },
 ];
+
+let situations = EXAMPLES;
+let order = [];
 
 const GAP = 1400;
 const queue = [];
@@ -62,9 +75,14 @@ let currentGame = "";
 let lastVerdict = null;
 let lastScore = null;
 
+loadSituations();
+
 sample?.addEventListener("click", () => {
-  const next = EXAMPLES[Math.floor(Math.random() * EXAMPLES.length)];
-  scenario.value = next;
+  const next = nextSituation();
+  if (!next) return;
+  scenario.value = next.premise;
+  picked.textContent = next.title;
+  picked.classList.remove("hidden");
   scenario.focus();
 });
 
@@ -100,6 +118,32 @@ for (const button of document.querySelectorAll("[data-game]")) {
   button.addEventListener("click", () => openInspect(button.dataset.game));
 }
 
+async function loadSituations() {
+  try {
+    const response = await fetch("/situations.json");
+    if (!response.ok) return;
+    const loaded = await response.json();
+    if (Array.isArray(loaded) && loaded.length > 0) {
+      situations = loaded;
+      order = [];
+    }
+  } catch {
+    // Keep the built-in examples so the table never opens broken.
+  }
+}
+
+/** Walk a shuffled order so repeated clicks do not repeat a scene. */
+function nextSituation() {
+  if (order.length === 0) {
+    order = situations.map((_, index) => index);
+    for (let i = order.length - 1; i > 0; i -= 1) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [order[i], order[j]] = [order[j], order[i]];
+    }
+  }
+  return situations[order.pop()];
+}
+
 function showView(view) {
   inspect.classList.toggle("hidden", view !== "inspect");
   results.classList.toggle("hidden", view !== "results");
@@ -128,6 +172,8 @@ function resetTable() {
   sceneTitle.textContent = "";
   sceneQ.textContent = "";
   scene.classList.add("hidden");
+  picked.textContent = "";
+  picked.classList.add("hidden");
   form.classList.remove("hidden");
   known?.classList.remove("hidden");
   rail.hidden = true;

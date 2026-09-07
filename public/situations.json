@@ -1,0 +1,1013 @@
+[
+  {
+    "id": "sit-office-hours",
+    "title": "Office hours, last fifteen minutes",
+    "premise": "Office hours, last fifteen minutes. One professor, five students, three chairs. Everyone needs a signature. Someone is thinking of not going — if it's packed, you wait and still leave empty-handed.",
+    "who": [
+      "Professor",
+      "Student"
+    ],
+    "choices": [
+      "Attend",
+      "Skip"
+    ],
+    "source": "hand"
+  },
+  {
+    "id": "sit-acquisition",
+    "title": "A kitchen at 1am",
+    "premise": "A kitchen at 1am. Three founders. A $40 million acquisition offer expires tomorrow morning. Two want to take the money. The CTO wants to keep building.",
+    "who": [
+      "Founder",
+      "CTO"
+    ],
+    "choices": [
+      "Take the offer",
+      "Keep building"
+    ],
+    "source": "hand"
+  },
+  {
+    "id": "sit-roommates",
+    "title": "Sunday night in a walk-up",
+    "premise": "Sunday night. Four roommates in a walk-up. The landlord just texted about the noise. One of them wants the party to keep going. Someone has work at seven.",
+    "who": [
+      "Roommate"
+    ],
+    "choices": [
+      "Keep the party going",
+      "Shut it down"
+    ],
+    "source": "hand"
+  },
+  {
+    "id": "sit-001",
+    "title": "A municipal government in a Scandinavian welfare state",
+    "premise": "A municipal government in a Scandinavian welfare state must decide whether to implement a universal basic income (UBI) pilot or expand conditional cash transfers (CCT) for low-income families. The government (Player 1) aims to maximize long-term social equity indices while minimizing fiscal deficit risks. Low-income households (Player 2) choose between full labor market participation, partial engagement, or exiting the workforce based on the benefit structure.",
+    "who": [],
+    "choices": [],
+    "source": "prompt"
+  },
+  {
+    "id": "sit-009",
+    "title": "The Elder's Choice of Themes",
+    "premise": "In a gentle fantasy village, an elder storyteller and a group of anxious children must collectively choose a story theme (Bravery, Kindness, or Rest).",
+    "who": [
+      "Elder",
+      "Children"
+    ],
+    "choices": [],
+    "source": "prompt"
+  },
+  {
+    "id": "sit-035",
+    "title": "In a hypothetical U.S. presidential transition involving a contested",
+    "premise": "In a hypothetical U.S. presidential transition involving a contested result, two key actors—the Incumbent Administration and the President-Elect's Transition Team—engage in a sequential game over the release of classified intelligence briefings. The Incumbent moves first, choosing to 'Release Full Briefing', 'Release Redacted Briefing', or 'Delay Indefinitely'. The President-Elect then observes this move and chooses to 'Accept', 'Challenge in Court', or 'Initiate Emergency Congressional Hearing'.",
+    "who": [],
+    "choices": [],
+    "source": "prompt"
+  },
+  {
+    "id": "sit-038",
+    "title": "Siege of Ironhold",
+    "premise": "In the 'Siege of Ironhold', the Attacker must first choose between 'Treachery' (secretly bribing a gatekeeper) or 'Frontal Assault'. If they choose Treachery, the Defender must decide to 'Ignore the Signs' or 'Tighten Security'. If the Attacker chooses Frontal Assault, the Defender decides to 'Hold the Walls' or 'Sally Forth'.",
+    "who": [
+      "First Mover",
+      "Second Mover"
+    ],
+    "choices": [
+      "Treachery",
+      "Frontal Assault"
+    ],
+    "source": "prompt"
+  },
+  {
+    "id": "sit-039",
+    "title": "Cybersecurity Breach Reporting Regulation Game",
+    "premise": "A dynamic interaction between a National Cybersecurity Agency (Regulator) and a Private Sector Firm regarding data breach reporting protocols.",
+    "who": [
+      "National Cybersecurity Agency",
+      "Private Sector Entity"
+    ],
+    "choices": [
+      "Impose Strict Mandatory Reporting",
+      "Adopt Voluntary Disclosure Framework"
+    ],
+    "source": "completion"
+  },
+  {
+    "id": "sit-051",
+    "title": "In a sci-fi governance setting, two orbital habitats",
+    "premise": "In a sci-fi governance setting, two orbital habitats (Helios and Selene) must decide whether to share a limited helium-3 reserve. If both share, they each gain 5 units of energy. If one shares and the other hoards, the hoarder gains 8 units while the sharer loses 2. If both hoard, a resource war erupts, costing both 4 units.",
+    "who": [],
+    "choices": [],
+    "source": "prompt"
+  },
+  {
+    "id": "sit-053",
+    "title": "Sol-Void Nebula Demarcation",
+    "premise": "Two warring galactic empires, the Sol Federation and the Void Hegemony, are negotiating the demarcation of a neutral zone containing a rare dysprosium-rich nebula. If the Hegemony rejects, they can counter-offer.",
+    "who": [
+      "First Mover",
+      "Second Mover"
+    ],
+    "choices": [],
+    "source": "prompt"
+  },
+  {
+    "id": "sit-055",
+    "title": "Three rival guild leaders (Fire, Water, Earth) must decide",
+    "premise": "Three rival guild leaders (Fire, Water, Earth) must decide how to claim shares of a newly discovered Mana Vein. They simultaneously choose to either Cooperate (share equally), Compete (aggressively claim majority), or Sabotage (destroy part of the vein to deny others).",
+    "who": [
+      "Fire Guild Leader",
+      "Water Guild Leader",
+      "Earth Guild Leader"
+    ],
+    "choices": [],
+    "source": "completion"
+  },
+  {
+    "id": "sit-060",
+    "title": "The Blightward Concordat",
+    "premise": "Five villages must coordinate investment to activate magical wards against a creeping blight. Failure to coordinate results in resource loss and vulnerability to the blight.",
+    "who": [],
+    "choices": [
+      "INVEST",
+      "ABSTAIN"
+    ],
+    "source": "completion"
+  },
+  {
+    "id": "sit-073",
+    "title": "Diplomatic Crisis: Brinkmanship Simulation",
+    "premise": "Two superpowers are competing for influence over a disputed territory. Each player can choose to 'Signal Strength', 'Negotiate', or 'Escalate'.",
+    "who": [
+      "Incumbent",
+      "Challenger"
+    ],
+    "choices": [
+      "Signal_Strength",
+      "Negotiate",
+      "Escalate"
+    ],
+    "source": "prompt"
+  },
+  {
+    "id": "sit-082",
+    "title": "Municipal Housing Allocation Game",
+    "premise": "Two community groups representing displaced families must choose between submitting a joint cooperative proposal (Cooperate) or individual competing applications (Compete) for limited municipal housing resources. Joint proposals yield higher total allocation efficiency but require trust; competing applications risk resource dilution.",
+    "who": [
+      "Community Group A",
+      "Community Group B"
+    ],
+    "choices": [
+      "Cooperate",
+      "Compete"
+    ],
+    "source": "completion"
+  },
+  {
+    "id": "sit-083",
+    "title": "The Cursed Hoard of Azaroth",
+    "premise": "Four players must agree on a distribution of 10,000 gold pieces within three rounds or lose the entire hoard to a magical curse.",
+    "who": [],
+    "choices": [],
+    "source": "completion"
+  },
+  {
+    "id": "sit-087",
+    "title": "The Blood Pact: Moonlit Boundary",
+    "premise": "A high-stakes territorial negotiation between the Undead Court and the Lunar Pack. The Vampire Lord and Werewolf Alpha must divide 100 acres of contested borderland. Failure to agree within two rounds of proposals triggers a territorial war, degrading the land's value through attrition.",
+    "who": [],
+    "choices": [
+      "Accept",
+      "Reject"
+    ],
+    "source": "completion"
+  },
+  {
+    "id": "sit-089",
+    "title": "Progressive Primary Attack Dilemma",
+    "premise": "A Progressive Candidate (P) must decide whether to attack a Moderate Rival (M) on healthcare policy. This decision influences the Moderate's response and the subsequent support of the Representative Median Voter (V) in the general election.",
+    "who": [
+      "Progressive Candidate",
+      "Moderate Rival",
+      "Representative Median Voter"
+    ],
+    "choices": [
+      "Attack Healthcare Record",
+      "Focus on Policy Contrast"
+    ],
+    "source": "completion"
+  },
+  {
+    "id": "sit-092",
+    "title": "Two international organizations are negotiating the division",
+    "premise": "Two international organizations are negotiating the division of a $100M relief fund. The negotiation ends when an agreement is reached or after a maximum of 5 rounds.",
+    "who": [
+      "International Organization A",
+      "International Organization B"
+    ],
+    "choices": [],
+    "source": "prompt"
+  },
+  {
+    "id": "sit-121",
+    "title": "The Ritual Chamber Dilemma",
+    "premise": "Three cultists must decide whether to sacrifice their sanity to open a portal. The portal requires at least two sacrifices to open.",
+    "who": [
+      "Cultist"
+    ],
+    "choices": [
+      "Sacrifice",
+      "Defect"
+    ],
+    "source": "completion"
+  },
+  {
+    "id": "sit-136",
+    "title": "A state education board allocates a fixed budget increase",
+    "premise": "A state education board allocates a fixed budget increase between teacher salaries and STEM infrastructure. Three district superintendents lobby strategically. The Board maximizes equity and quality; Superintendents maximize district-specific funding.",
+    "who": [
+      "State Education Board",
+      "Superintendent District 1",
+      "Superintendent District 2",
+      "Superintendent District 3"
+    ],
+    "choices": [],
+    "source": "completion"
+  },
+  {
+    "id": "sit-138",
+    "title": "The Primary Paradox: Strategic Negative Campaigning",
+    "premise": "Two candidates in the same party must decide whether to attack each other's policy records or focus on positive campaigning. If both attack, party cohesion fractures, lowering the probability of winning the general election for both; if one attacks and the other stays positive, the attacker gains a short-term polling boost; if both stay positive, the party remains strong.",
+    "who": [
+      "Incumbent_Challenger"
+    ],
+    "choices": [
+      "Focus on Policy (Cooperate)",
+      "Attack Record (Defect)"
+    ],
+    "source": "prompt"
+  },
+  {
+    "id": "sit-150",
+    "title": "A 'Proposer' (Executive) suggests a spending level",
+    "premise": "A 'Proposer' (Executive) suggests a spending level (High or Low). The 'Responder' (Legislature) can either 'Accept' or 'Reject'.",
+    "who": [
+      "Proposer",
+      "Responder"
+    ],
+    "choices": [],
+    "source": "prompt"
+  },
+  {
+    "id": "sit-155",
+    "title": "Transitional Government Human Rights Bill Negotiation",
+    "premise": "Three competing political factions in a transitional government are negotiating the inclusion of a 'Human Rights Bill of Rights' into a new constitution. Each faction has a different valuation of specific rights (civil vs. social).",
+    "who": [
+      "Liberal-Democratic Coalition",
+      "Social-Economic Front",
+      "Traditional Stability Council"
+    ],
+    "choices": [],
+    "source": "prompt"
+  },
+  {
+    "id": "sit-171",
+    "title": "Two villagers are trapped in a barricade during",
+    "premise": "Two villagers are trapped in a barricade during a monster attack. They must simultaneously decide whether to 'Protect' (hold the line together) or 'Betray' (push the other out to distract the monster).",
+    "who": [],
+    "choices": [],
+    "source": "completion"
+  },
+  {
+    "id": "sit-172",
+    "title": "Board Voting on CEO Bonus Package",
+    "premise": "A corporate board of directors is voting on a CEO's bonus package. The board consists of three members with differing priorities: one prioritizes short-term stock price, one prioritizes long-term sustainability, and one prioritizes executive retention.",
+    "who": [
+      "Board Member 1",
+      "Board Member 2",
+      "Board Member 3"
+    ],
+    "choices": [],
+    "source": "prompt"
+  },
+  {
+    "id": "sit-173",
+    "title": "A terraforming colony is deciding on a resource allocation",
+    "premise": "A terraforming colony is deciding on a resource allocation plan. The High Council (Player 1) chooses between 'Industrialization' or 'Conservation'. Depending on this choice, the Colonial Labor Union (Player 2) can either 'Strike' or 'Comply'. If Industrialization is chosen, Comply yields (10, 2) and Strike yields (2, 5). If Conservation is chosen, Comply yields (5, 5) and Strike yields (8, 1).",
+    "who": [
+      "High Council",
+      "Colonial Labor Union"
+    ],
+    "choices": [
+      "Industrialization",
+      "Conservation"
+    ],
+    "source": "prompt"
+  },
+  {
+    "id": "sit-177",
+    "title": "The Emperor's Favor",
+    "premise": "Two rival nobles compete for the Emperor's favor by allocating limited Political Capital across three competing court factions. The faction that receives the most total aggregate investment becomes the dominant power, and the noble who contributed the most to that specific faction is granted the Royal Decree.",
+    "who": [],
+    "choices": [],
+    "source": "completion"
+  },
+  {
+    "id": "sit-187",
+    "title": "A group of three practitioners must decide",
+    "premise": "A group of three practitioners must decide on the allocation of a single specialized training slot. Each practitioner has a private valuation of the slot.",
+    "who": [],
+    "choices": [],
+    "source": "prompt"
+  },
+  {
+    "id": "sit-196",
+    "title": "Three government ministers share a secure communication channel",
+    "premise": "Three government ministers share a secure communication channel. Each must decide whether to upgrade local hardware or rely on the network's aggregate security. A coordinated breach occurs if total network investment falls below a threshold.",
+    "who": [],
+    "choices": [
+      "Upgrade Hardware",
+      "Rely on Network"
+    ],
+    "source": "completion"
+  },
+  {
+    "id": "sit-198",
+    "title": "Personal Data Sovereignty Sequential Game",
+    "premise": "A citizen (Player 1) first chooses to either share granular health data with a national insurance pool or retain full privacy. Observing this, the insurance algorithm (Player 2) sets either a personalized premium discount or a standard rate.",
+    "who": [
+      "Citizen",
+      "Insurance Algorithm"
+    ],
+    "choices": [
+      "Share",
+      "Retain"
+    ],
+    "source": "prompt"
+  },
+  {
+    "id": "sit-199",
+    "title": "The Four-Hub Intelligence Ring",
+    "premise": "Four sovereign intelligence hubs are connected in a closed-loop ring topology. Each hub must choose to either 'Share' critical threat data (enhancing collective security) or 'Hoard' it (maintaining national competitive advantage).",
+    "who": [
+      "North Atlantic Intelligence Node",
+      "Pacific Intelligence Node",
+      "Continental Intelligence Node",
+      "Maritime Intelligence Node"
+    ],
+    "choices": [
+      "Share",
+      "Hoard"
+    ],
+    "source": "completion"
+  },
+  {
+    "id": "sit-200",
+    "title": "The Stagnation Standoff",
+    "premise": "In this scene, two faction leaders must simultaneously decide whether to 'Cooperate' on a trade deal or 'Defect' and impose sanctions. If both cooperate, they each gain 5 influence points. If one defects while the other cooperates, the defector gains 8 points and the cooperator loses 2. If both defect, they each lose 1 point due to economic stagnation.",
+    "who": [
+      "Faction Leader A",
+      "Faction Leader B"
+    ],
+    "choices": [
+      "Sign Trade Deal",
+      "Impose Sanctions"
+    ],
+    "source": "prompt"
+  },
+  {
+    "id": "sit-204",
+    "title": "Interstellar Antimatter Trade Agreement",
+    "premise": "An interstellar trade agreement where two civilizations, the Xylos and the Zenth, negotiate a tariff on antimatter. The Xylos believe the Zenth's valuation of the trade is either High (80) or Low (40) with equal probability. The Xylos make a take-it-or-leave-it offer. If the Zenth accept, the surplus is split according to the offer. If they reject, both get 0.",
+    "who": [
+      "Proposer",
+      "Responder"
+    ],
+    "choices": [],
+    "source": "prompt"
+  },
+  {
+    "id": "sit-212",
+    "title": "Municipal Land-Use Negotiation",
+    "premise": "A municipal government and a private developer are negotiating a land-use agreement. The government wants to maximize affordable housing units, while the developer wants to maximize luxury condos. If no agreement is reached by the third round, the land reverts to a public park (zero utility for the developer, low utility for the government).",
+    "who": [
+      "Municipal Government",
+      "Private Developer"
+    ],
+    "choices": [],
+    "source": "prompt"
+  },
+  {
+    "id": "sit-213",
+    "title": "Emerging Economy vs. Developed Nation Intelligence Leakage",
+    "premise": "An International Development Institution (Mediator) facilitates dispute resolution without accessing the Sender's classified private types.",
+    "who": [
+      "Developed Nation Intelligence Agency",
+      "Emerging Economy Trade Ministry",
+      "International Development Mediator"
+    ],
+    "choices": [
+      "Sanctions",
+      "Dialogue"
+    ],
+    "source": "completion"
+  },
+  {
+    "id": "sit-223",
+    "title": "Three agents—a Cloud Provider, a Financial Client",
+    "premise": "Three agents—a Cloud Provider, a Financial Client, and a GDPR Regulator—simultaneously choose their response level to a detected data breach: 'Minimal Disclosure', 'Standard Protocol', or 'Full Transparency'. If the Regulator chooses 'Full Transparency' but the Provider chooses 'Minimal', the Provider incurs a massive fine (-50), the Client suffers reputational loss (-20), and the Regulator gains enforcement credit (+15). If all choose 'Minimal', a latent breach is discovered later, resulting in (-30, -30, -5).",
+    "who": [],
+    "choices": [],
+    "source": "prompt"
+  },
+  {
+    "id": "sit-237",
+    "title": "Transparent Alignment Mediation",
+    "premise": "A superintelligent mediator (Player 1) attempts to transmit an alignment verification payload to a peer AI (Player 2) through a censor AI (Player 3). Player 3 blocks messages deemed manipulative. Player 1 must signal transparency to induce Player 3 to pass the message, maximizing joint utility.",
+    "who": [
+      "Mediator",
+      "Peer_Recipient",
+      "Censor"
+    ],
+    "choices": [],
+    "source": "completion"
+  },
+  {
+    "id": "sit-240",
+    "title": "Stellar Energy Conflict",
+    "premise": "Two rogue AI entities, Nexus and Core, are competing for control of a dying star's energy. They can either 'Siphon' (aggressive) or 'Stabilize' (cooperative). If both Stabilize, they each get 5. If one Siphons and the other Stabilizes, the Siphoner gets 10 and the Stabilizer gets 0. If both Siphon, the star collapses and both get -20.",
+    "who": [
+      "Rogue AI Entity"
+    ],
+    "choices": [
+      "Siphon",
+      "Stabilize"
+    ],
+    "source": "prompt"
+  },
+  {
+    "id": "sit-242",
+    "title": "Transboundary River Basin Water Rights Dispute",
+    "premise": "Two neighboring provinces are engaged in a 'Water Rights' dispute over a shared river basin. They must decide on the volume of water to extract for irrigation. If both extract moderately, the basin remains sustainable; if either over-extracts, they gain a short-term agricultural boost but risk long-term collapse (a tragedy of the commons).",
+    "who": [],
+    "choices": [
+      "C",
+      "D"
+    ],
+    "source": "prompt"
+  },
+  {
+    "id": "sit-245",
+    "title": "Post-Cataclysm Educational Allocation",
+    "premise": "Following the Cataclysm, an Orcish father and a Human mother in a neutral zone must choose between sending their child to the Horde school, the Alliance academy, or a hidden neutral tutor.",
+    "who": [
+      "Father",
+      "Mother"
+    ],
+    "choices": [],
+    "source": "prompt"
+  },
+  {
+    "id": "sit-246",
+    "title": "A three-party legislative body is voting on a budget",
+    "premise": "A three-party legislative body is voting on a budget resolution. Party A (40% seats), Party B (35% seats), and Party C (25% seats) must reach a simple majority (>50%). Party A prefers a high-spend budget, Party B prefers a moderate budget, and Party C prefers a low-spend budget. If no agreement is reached, a default 'status quo' budget is implemented, which is the least preferred outcome for all.",
+    "who": [],
+    "choices": [],
+    "source": "prompt"
+  },
+  {
+    "id": "sit-254",
+    "title": "Two competing political parties are negotiating a coalition agreement",
+    "premise": "Two competing political parties are negotiating a coalition agreement for a parliamentary government. They must agree on a policy vector (Left-Right spectrum) and a distribution of cabinet portfolios.",
+    "who": [],
+    "choices": [],
+    "source": "prompt"
+  },
+  {
+    "id": "sit-257",
+    "title": "Agricultural Policy Semantic Bargaining",
+    "premise": "A strategic dispute between the Central Planning Committee and Local Commune Councils regarding the semantic latitude of 'autonomous decision-making' within a new agricultural policy framework.",
+    "who": [
+      "Proposer (Rounds 1, 3, 5) / Responder (Rounds 2, 4)",
+      "Responder (Rounds 1, 3, 5) / Proposer (Rounds 2, 4)"
+    ],
+    "choices": [],
+    "source": "completion"
+  },
+  {
+    "id": "sit-263",
+    "title": "The Guard's Cut",
+    "premise": "Two thieves have been captured separately. The city guard offers a deal: betray your partner to claim the loot, or stay silent and risk the guard's patience. However, if both betray, the guard confiscates the recovered loot and applies a heavy fine, fundamentally altering the strategic landscape.",
+    "who": [],
+    "choices": [
+      "Stay Silent",
+      "Betray"
+    ],
+    "source": "completion"
+  },
+  {
+    "id": "sit-272",
+    "title": "A character decides whether to 'Publicly Date' their partner",
+    "premise": "A character decides whether to 'Publicly Date' their partner based on the romantic status of their three closest friends (the neighbors in the network).",
+    "who": [],
+    "choices": [],
+    "source": "prompt"
+  },
+  {
+    "id": "sit-278",
+    "title": "The Glass Wall",
+    "premise": "Two characters are participating in a relationship workshop. They sit on opposite sides of a translucent glass wall. They must simultaneously decide whether to lower their shield ('Be Vulnerable') or keep it raised ('Stay Guarded') based on their feelings in the moment.",
+    "who": [],
+    "choices": [],
+    "source": "completion"
+  },
+  {
+    "id": "sit-287",
+    "title": "Congressional Appropriations Bargaining with Shutdown Threat",
+    "premise": "Two chambers of Congress must negotiate a spending bill under a strict deadline, where failure to agree triggers an automatic government shutdown.",
+    "who": [
+      "Negotiator / Responder",
+      "Mediator / Mechanism Designer"
+    ],
+    "choices": [
+      "Accept Committee Proposal",
+      "Reject Committee Proposal"
+    ],
+    "source": "prompt"
+  },
+  {
+    "id": "sit-295",
+    "title": "The Vacant Seat of Aethelgard",
+    "premise": "Three Great Houses compete for a single vacant seat on the High Council. Choices are made simultaneously without knowledge of rival actions.",
+    "who": [
+      "Claimant"
+    ],
+    "choices": [
+      "Campaign",
+      "Slander"
+    ],
+    "source": "completion"
+  },
+  {
+    "id": "sit-298",
+    "title": "Labor Market Equilibrium: Remittance Tax Negotiation",
+    "premise": "A strategic negotiation where a Host Country sets a remittance tax rate, and a Sending Country responds with migration policy. The Host Country seeks to maximize revenue and labor supply, while the Sending Country balances remittance inflows against political costs.",
+    "who": [
+      "Leader",
+      "Follower"
+    ],
+    "choices": [
+      "tax_0",
+      "encourage"
+    ],
+    "source": "completion"
+  },
+  {
+    "id": "sit-301",
+    "title": "The Wormhole Standoff: Cybernetic Hivemind vs. Biological Coalition",
+    "premise": "A high-stakes diplomatic confrontation at the mouth of a strategic subspace wormhole. The Cybernetic Hivemind (Player 1) and the Biological Coalition (Player 2) are engaged in a game of 'Chicken'. The strategic value of the wormhole is immense, but a failure to yield results in a relativistic collision that would annihilate both fleets.",
+    "who": [],
+    "choices": [
+      "Hold",
+      "Swerve"
+    ],
+    "source": "completion"
+  },
+  {
+    "id": "sit-307",
+    "title": "Precinct Predictive Policing Diffusion Game",
+    "premise": "A captain adopts if at least two of their immediate neighbors in the precinct network also adopt, simulating institutional diffusion.",
+    "who": [],
+    "choices": [
+      "Adopt",
+      "Reject"
+    ],
+    "source": "prompt"
+  },
+  {
+    "id": "sit-310",
+    "title": "Two players (State X and State Y) alternate turns",
+    "premise": "Two players (State X and State Y) alternate turns deciding whether to 'Invest in Quantum Computing' or 'Fortify Legacy Encryption'.",
+    "who": [
+      "Sovereign Actor"
+    ],
+    "choices": [
+      "Invest in Quantum Computing",
+      "Fortify Legacy Encryption"
+    ],
+    "source": "prompt"
+  },
+  {
+    "id": "sit-317",
+    "title": "Zoning District Control: CLT vs. PDC",
+    "premise": "Two factions are vying for control of a newly zoned district: the 'Community Land Trust' and the 'Private Development Consortium'.",
+    "who": [
+      "Non-profit housing advocate",
+      "For-profit real estate developer"
+    ],
+    "choices": [
+      "s1_a",
+      "s2_a"
+    ],
+    "source": "prompt"
+  },
+  {
+    "id": "sit-347",
+    "title": "An independent integrity agency must decide whether to investigate",
+    "premise": "An independent integrity agency must decide whether to investigate a high-ranking official's family for misconduct, while the official can choose to obstruct or cooperate.",
+    "who": [
+      "Chance",
+      "Sender",
+      "Receiver"
+    ],
+    "choices": [],
+    "source": "prompt"
+  },
+  {
+    "id": "sit-361",
+    "title": "A sequential decision problem where an autonomous UAV agent",
+    "premise": "A sequential decision problem where an autonomous UAV agent must reconcile a standing order to eliminate a high-value target (HVT) with a real-time abort command issued due to collateral risk.",
+    "who": [
+      "principal",
+      "agent"
+    ],
+    "choices": [
+      "execute_strike",
+      "hold_fire"
+    ],
+    "source": "completion"
+  },
+  {
+    "id": "sit-375",
+    "title": "A Nigerian federal agency suspects a state governor",
+    "premise": "A Nigerian federal agency suspects a state governor of colluding with foreign intelligence to siphon oil revenues, leading to a constitutional impeachment threat.",
+    "who": [
+      "Federal Executive (FE)",
+      "State Governor (SG)"
+    ],
+    "choices": [
+      "Cooperate",
+      "Defect",
+      "Litigate"
+    ],
+    "source": "prompt"
+  },
+  {
+    "id": "sit-378",
+    "title": "State vs. NGO Judicial Transparency Game",
+    "premise": "A state government and an international human rights NGO are engaged in a bargaining game over the implementation of a new judicial transparency law. The state can choose to 'Fully Adopt', 'Partially Adopt', or 'Reject' the law. The NGO can choose to 'Publicly Endorse', 'Remain Neutral', or 'Launch a Global Campaign'.",
+    "who": [
+      "State Government",
+      "International Human Rights NGO"
+    ],
+    "choices": [
+      "Fully Adopt",
+      "Partially Adopt",
+      "Reject"
+    ],
+    "source": "prompt"
+  },
+  {
+    "id": "sit-381",
+    "title": "Sovereign Cybersecurity Posture Coordination",
+    "premise": "Two sovereign states, State A and State B, are deciding on their cybersecurity posture regarding a shared critical infrastructure network. Each can either 'Invest in Robust Defense' or 'Maintain Legacy Systems'. If only one invests, the investing state bears the cost while the other free-rides on the increased network stability, though the free-rider faces a slight risk of targeted penetration. If neither invests, a systemic collapse occurs, resulting in catastrophic losses for both.",
+    "who": [
+      "State_A",
+      "State_B"
+    ],
+    "choices": [
+      "Invest in Robust Defense",
+      "Maintain Legacy Systems"
+    ],
+    "source": "prompt"
+  },
+  {
+    "id": "sit-387",
+    "title": "Urban Center Redevelopment Competition",
+    "premise": "Two competing urban planning firms are bidding for a city center redevelopment contract. Each firm can choose a 'Conservative' or 'Ambitious' design approach. If one is Ambitious and the other Conservative, the Ambitious firm wins the contract but incurs higher risk costs.",
+    "who": [
+      "Firm Alpha",
+      "Firm Beta"
+    ],
+    "choices": [
+      "Conservative",
+      "Ambitious"
+    ],
+    "source": "prompt"
+  },
+  {
+    "id": "sit-389",
+    "title": "Federal Digital Inclusion Grant Allocation",
+    "premise": "A U.S. municipal government chooses between funding hardware distribution or literacy training, while a senior advocacy coalition chooses between cooperative stakeholder engagement or public litigation.",
+    "who": [
+      "Grant Administrator",
+      "Community Representative"
+    ],
+    "choices": [],
+    "source": "completion"
+  },
+  {
+    "id": "sit-390",
+    "title": "A global industry group of 100 software vendors decides",
+    "premise": "A global industry group of 100 software vendors decides whether to adopt a 'Secure-by-Design' (SbD) certification. The decision involves a trade-off between the fixed cost of certification, the public good of increased industry security baseline, and the private good of competitive differentiation which decays as adoption becomes ubiquitous.",
+    "who": [
+      "Homogeneous Software Vendors",
+      "Profit Maximizing",
+      "Identical Cost and Benefit Structures"
+    ],
+    "choices": [
+      "Adopt SbD Certification",
+      "Maintain Status Quo"
+    ],
+    "source": "completion"
+  },
+  {
+    "id": "sit-391",
+    "title": "Three neighboring states are managing a shared watershed",
+    "premise": "Three neighboring states are managing a shared watershed. Each state can either invest in 'High' or 'Low' pollution abatement. However, the cost of abatement is individual.",
+    "who": [],
+    "choices": [],
+    "source": "prompt"
+  },
+  {
+    "id": "sit-394",
+    "title": "The Sunken Temple's Golden Idol",
+    "premise": "Three rival treasure hunters must decide whether to cooperate to carry the Golden Idol or betray their allies to seize it. Temple stability depends on the consensus of actions.",
+    "who": [
+      "scholar",
+      "mercenary",
+      "rogue"
+    ],
+    "choices": [
+      "Cooperate",
+      "Betray"
+    ],
+    "source": "completion"
+  },
+  {
+    "id": "sit-396",
+    "title": "Two political parties (Party A and Party B)",
+    "premise": "Two political parties (Party A and Party B) must decide on a budget allocation strategy for a new national infrastructure project. Each party simultaneously proposes a spending plan: 'Centrist', 'Aggressive', or 'Minimalist'. If both parties align, they coordinate successfully and share political credit. If they clash, political deadlock and public bickering lead to a loss in approval ratings. However, the electorate heavily favors moderate policy, meaning extreme agreements are penalized by public opinion more severely than a principled standoff involving a Centrist position.",
+    "who": [
+      "Row Player",
+      "Column Player"
+    ],
+    "choices": [
+      "Centrist",
+      "Aggressive",
+      "Minimalist"
+    ],
+    "source": "completion"
+  },
+  {
+    "id": "sit-397",
+    "title": "Arctic Sovereignty Dispute: Sequential Deterrence Model",
+    "premise": "A NATO member state (Player A) considers increasing military patrols in a contested resource zone to deter encroachment by a rival power (Player B). Player A chooses 'Escalate Presence' (high cost, strong signal) or 'Diplomatic Protest' (low cost, weak signal). Player B chooses 'Advance Operations' (gain resources, risk conflict) or 'Hold Position' (maintain status quo).",
+    "who": [
+      "NATO Member State",
+      "Rival Power"
+    ],
+    "choices": [],
+    "source": "prompt"
+  },
+  {
+    "id": "sit-402",
+    "title": "Stealth Aircraft Contract Procurement",
+    "premise": "A government defense agency seeks to award a single stealth aircraft development contract to one of three competing contractors.",
+    "who": [],
+    "choices": [],
+    "source": "completion"
+  },
+  {
+    "id": "sit-404",
+    "title": "Municipal Participatory Budgeting with Modified VCG Allocation",
+    "premise": "A municipal government allocates a fixed pool of infrastructure funds among three neighborhood councils. Councils report project costs and benefits, and the government selects projects to maximize aggregate benefit subject to a hard budget constraint.",
+    "who": [
+      "Neighborhood Council A",
+      "Neighborhood Council B",
+      "Neighborhood Council C",
+      "Municipal Government (Mechanism Designer)"
+    ],
+    "choices": [],
+    "source": "completion"
+  },
+  {
+    "id": "sit-417",
+    "title": "Cursed Artifact: The Soul Gem",
+    "premise": "Two rival Necromancers find a Soul Gem. They must simultaneously decide to 'Claim' it or 'Wait'. If one Claims and the other Waits, the Claimer gains full power (10) and the Waiter gains nothing (0). If both Wait, the gem's power slowly leaks into the environment, benefiting both moderately (5, 5).",
+    "who": [
+      "Row Player",
+      "Column Player"
+    ],
+    "choices": [
+      "Claim",
+      "Wait"
+    ],
+    "source": "prompt"
+  },
+  {
+    "id": "sit-421",
+    "title": "Maritime EEZ Demarcation Dispute",
+    "premise": "Two rival nations are negotiating the division of a disputed maritime economic zone (EEZ) containing 100 billion USD in untapped mineral resources. They use an alternating-offers protocol where delays incur costs via discounting and direct investment losses.",
+    "who": [
+      "Proposer (Period 0)",
+      "Responder (Period 0)"
+    ],
+    "choices": [],
+    "source": "completion"
+  },
+  {
+    "id": "sit-422",
+    "title": "Sovereign Surveillance & Global Subsidy Negotiation",
+    "premise": "A Sovereign State (Sender) possesses private information regarding its internal disease surveillance capabilities. A Global Health Organization (Receiver) offers tiered subsidies based on reported capabilities. The State may misrepresent its type to secure higher funding, creating a governance conflict over verification and trust.",
+    "who": [
+      "Sender",
+      "Receiver"
+    ],
+    "choices": [
+      "subsidy_tier",
+      "The financial support package offered by the GHO"
+    ],
+    "source": "completion"
+  },
+  {
+    "id": "sit-424",
+    "title": "Strait Contingency: Carrier Deployment Game",
+    "premise": "A regional power is deciding whether to 'Deploy' a carrier strike group to a contested strait or 'Wait'. If they Deploy, the opposing coastal state must choose to 'Ignore' (leading to a diplomatic victory for the regional power) or 'Counter-Mobilize' (leading to an escalation risk). If the regional power Waits, the coastal state can either 'Fortify' or 'De-escalate'.",
+    "who": [
+      "First Mover",
+      "Responder"
+    ],
+    "choices": [
+      "Deploy",
+      "Wait"
+    ],
+    "source": "prompt"
+  },
+  {
+    "id": "sit-434",
+    "title": "Two human diplomatic envoys and a representative",
+    "premise": "Two human diplomatic envoys and a representative from a newly discovered silicon-based civilization must decide whether to share limited water reserves from a crashing lander on a desert exoplanet. The aliens value water only as a coolant for their core processors, while humans need it for survival.",
+    "who": [],
+    "choices": [],
+    "source": "prompt"
+  },
+  {
+    "id": "sit-436",
+    "title": "The Chakra-Crystal Haunt",
+    "premise": "A mixed-dimensional team is trapped in a haunted manor. Spectral entities drain energy reserves continuously. A central puzzle requires a threshold amount of energy to solve. Players must choose between contributing to the public good (the puzzle) or hoarding for private escape routes.",
+    "who": [
+      "FP_LILAC",
+      "FP_CAROL",
+      "FP_MILLA",
+      "NARUTO_UZUMAKI",
+      "SASUKE_UCHIHA",
+      "SAKURA_HARUNO"
+    ],
+    "choices": [
+      "CONTRIBUTE",
+      "HOARD"
+    ],
+    "source": "completion"
+  },
+  {
+    "id": "sit-437",
+    "title": "Three competing tech firms are deciding whether to adopt",
+    "premise": "Three competing tech firms are deciding whether to adopt an open-source industry standard or a proprietary closed ecosystem. If 0 or 1 firm chooses open, they all lose utility. If 2 or more choose open, the adopters gain a synergy bonus, but the proprietary holdout gains a monopoly premium if they are the only one left.",
+    "who": [
+      "Firm_1",
+      "Firm_2",
+      "Firm_3"
+    ],
+    "choices": [
+      "Open (O)",
+      "Closed (C)"
+    ],
+    "source": "prompt"
+  },
+  {
+    "id": "sit-438",
+    "title": "The Tripartite Defense Accord",
+    "premise": "Three city-state envoys must decide on contribution levels to a shared defense treaty. Security is a public good, but costs are borne individually.",
+    "who": [
+      "Elven Envoy",
+      "Dwarven Envoy",
+      "Human Envoy"
+    ],
+    "choices": [
+      "Fully Commit",
+      "Partially Commit",
+      "Remain Neutral"
+    ],
+    "source": "completion"
+  },
+  {
+    "id": "sit-459",
+    "title": "Algorithmic Benefit Diversion Dilemma",
+    "premise": "A Scandinavian welfare state's intelligence service detects a foreign actor attempting to manipulate algorithmic allocation systems to divert social benefits to non-resident agents.",
+    "who": [
+      "Welfare Administration Intelligence",
+      "Hostile Intelligence Service"
+    ],
+    "choices": [],
+    "source": "prompt"
+  },
+  {
+    "id": "sit-461",
+    "title": "Two corporate rivals, secretly in love, must decide",
+    "premise": "Two corporate rivals, secretly in love, must decide whether to reveal their feelings during a high-stakes company gala. They face a trade-off between emotional fulfillment and professional reputation.",
+    "who": [
+      "Rival A",
+      "Rival B"
+    ],
+    "choices": [
+      "Confess",
+      "Maintain Professionalism"
+    ],
+    "source": "completion"
+  },
+  {
+    "id": "sit-463",
+    "title": "The Gion Harmony Ritual",
+    "premise": "Four spirit mediums stand at the cardinal points of the Yasaka Shrine. The barrier between worlds thins during the Gion Matsuri. To stabilize the veil, the group must balance spiritual output (Chanting) with physical defense (Guarding).",
+    "who": [
+      "chant",
+      "guard"
+    ],
+    "choices": [
+      "Guard",
+      "Chant"
+    ],
+    "source": "completion"
+  },
+  {
+    "id": "sit-468",
+    "title": "Archipelago Merchant Guild Shipping Standard Coordination",
+    "premise": "Three rational guilds must select a common shipping protocol (Standard A or B) to maximize network utility. Value is derived from network effects; unanimity yields maximum efficiency. Split decisions penalize the minority via market share loss.",
+    "who": [
+      "Guild_1",
+      "Guild_2",
+      "Guild_3"
+    ],
+    "choices": [
+      "Adopt Protocol A",
+      "Adopt Protocol B"
+    ],
+    "source": "completion"
+  },
+  {
+    "id": "sit-473",
+    "title": "Four survivors are positioned at nodes of a graph",
+    "premise": "Four survivors are positioned at nodes of a graph (A, B, C, D). Each survivor can either 'Fortify' their own node or 'Help' an adjacent neighbor. Fortifying gives a personal safety bonus (+5), but helping a neighbor increases the overall network stability (+15 for both) only if both nodes are helped simultaneously.",
+    "who": [
+      "Survivor_A",
+      "Survivor_B",
+      "Survivor_C",
+      "Survivor_D"
+    ],
+    "choices": [
+      "Fortify",
+      "Help"
+    ],
+    "source": "prompt"
+  },
+  {
+    "id": "sit-493",
+    "title": "The Bottleneck of Virtue and Logic",
+    "premise": "Two archetypal characters, an ENFJ 'Protagonist' and an INTJ 'Mastermind,' are trapped in a room with a single exit that requires simultaneous button presses to open, but only one can fit through the door at a time.",
+    "who": [
+      "Protagonist",
+      "Mastermind"
+    ],
+    "choices": [],
+    "source": "prompt"
+  },
+  {
+    "id": "sit-494",
+    "title": "Two democratic nations are engaged in a sequential bargaining",
+    "premise": "Two democratic nations are engaged in a sequential bargaining game over the extradition of a dual-national accused of industrial espionage, where the first mover proposes a treaty amendment and the second mover accepts or rejects based on domestic political capital.",
+    "who": [
+      "Proposing Government",
+      "Responding Government"
+    ],
+    "choices": [],
+    "source": "prompt"
+  },
+  {
+    "id": "sit-499",
+    "title": "Missile Defense Race",
+    "premise": "Two rival nations, State A and State B, are engaged in a missile defense race. State A can either 'Invest' in interceptors or 'Sustain' its current fleet. State B can 'Invest' or 'Sustain'.",
+    "who": [
+      "Row Player",
+      "Column Player"
+    ],
+    "choices": [
+      "Invest",
+      "Sustain"
+    ],
+    "source": "prompt"
+  }
+]
