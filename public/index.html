@@ -7,10 +7,10 @@
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
-      href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,620&family=Source+Sans+3:wght@400;560;700&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,620&family=Geist:wght@400;500;550;600;700&family=Geist+Mono:wght@400;500&display=swap"
       rel="stylesheet"
     />
-    <link rel="stylesheet" href="/styles.css?v=13" />
+    <link rel="stylesheet" href="/styles.css?v=15" />
   </head>
   <body>
     <div class="room" id="room">
@@ -30,7 +30,7 @@
         <p class="textbook-line" id="inspect-textbook"></p>
         <div class="actions">
           <button type="button" id="sit">Sit them down</button>
-          <button type="button" class="ghost" id="inspect-back">Back</button>
+          <button type="button" class="outline" id="inspect-back">Back</button>
         </div>
       </section>
 
@@ -52,7 +52,7 @@
                 ></textarea>
                 <div class="actions">
                   <button type="submit" id="start">Sit them down</button>
-                  <button type="button" class="ghost" id="sample">Use an example</button>
+                  <button type="button" class="outline" id="sample">Use an example</button>
                 </div>
               </form>
               <div class="scene hidden" id="scene" aria-live="polite">
@@ -98,20 +98,37 @@
           </div>
         </section>
 
-        <aside class="rail" id="rail" hidden>
-          <p class="kicker" id="title"></p>
-          <p class="premise" id="premise"></p>
-          <ol class="log" id="log"></ol>
-          <div class="play-end hidden" id="play-end">
-            <button type="button" class="hidden" id="see-results">See results</button>
-            <button type="button" class="ghost hidden" id="another">Another game</button>
-            <div class="free-end hidden" id="free-end">
-              <p class="flag" id="free-flag"></p>
-              <p class="outcome" id="free-outcome"></p>
-              <ul class="tally" id="free-tally"></ul>
-              <p class="reading" id="free-reading"></p>
-              <div class="notes" id="free-notes"></div>
-              <button type="button" class="ghost" id="again">Another situation</button>
+        <aside class="rail" id="rail" hidden aria-label="Transcript">
+          <div class="rail-head">
+            <div class="rail-head-text">
+              <p class="kicker" id="title"></p>
+              <p class="premise" id="premise"></p>
+            </div>
+            <button
+              type="button"
+              class="icon-btn"
+              id="rail-toggle"
+              aria-expanded="true"
+              aria-controls="rail-body"
+            >
+              <span aria-hidden="true" id="rail-toggle-mark">✕</span>
+              <span class="sr-only" id="rail-toggle-label">Hide transcript</span>
+            </button>
+          </div>
+          <div class="rail-body" id="rail-body">
+            <ul class="legend" id="legend" aria-label="Who is speaking"></ul>
+            <ol class="log" id="log"></ol>
+            <div class="play-end hidden" id="play-end">
+              <button type="button" class="hidden" id="see-results">See results</button>
+              <button type="button" class="ghost hidden" id="another">Another game</button>
+              <div class="free-end hidden" id="free-end">
+                <p class="flag" id="free-flag"></p>
+                <p class="outcome" id="free-outcome"></p>
+                <ul class="tally" id="free-tally"></ul>
+                <p class="reading" id="free-reading"></p>
+                <div class="notes" id="free-notes"></div>
+                <button type="button" class="ghost" id="again">Another situation</button>
+              </div>
             </div>
           </div>
         </aside>
@@ -133,6 +150,6 @@
         </div>
       </section>
     </div>
-    <script src="/app.js?v=13"></script>
+    <script src="/app.js?v=15"></script>
   </body>
 </html>

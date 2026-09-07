@@ -48,6 +48,10 @@ const backTable = document.querySelector("#back-table");
 const another = document.querySelector("#another");
 const anotherResults = document.querySelector("#another-results");
 const known = document.querySelector("#known");
+const legend = document.querySelector("#legend");
+const railToggle = document.querySelector("#rail-toggle");
+const railToggleMark = document.querySelector("#rail-toggle-mark");
+const railToggleLabel = document.querySelector("#rail-toggle-label");
 
 // Used until situations.json loads, and kept as the fallback if it never does.
 const EXAMPLES = [
@@ -68,7 +72,12 @@ let situations = EXAMPLES;
 let order = [];
 
 const GAP = 1400;
+// Accents defined as --p1..--p6 in styles.css. A table seats at most six.
+const PALETTE = 6;
 const queue = [];
+// Player name -> accent slot, so a seat, its bubble, its transcript lines and
+// its verdict row all read as the same person.
+const accents = new Map();
 let lastSpeech = 0;
 let busy = false;
 let currentGame = "";
@@ -84,6 +93,13 @@ sample?.addEventListener("click", () => {
   picked.textContent = next.title;
   picked.classList.remove("hidden");
   scenario.focus();
+});
+
+// Once you edit the text, the loaded situation's title no longer describes it.
+scenario?.addEventListener("input", () => {
+  if (picked.classList.contains("hidden")) return;
+  picked.textContent = "";
+  picked.classList.add("hidden");
 });
 
 again?.addEventListener("click", resetTable);
@@ -107,6 +123,13 @@ seeResults?.addEventListener("click", () => {
 });
 
 backTable?.addEventListener("click", () => showView("play"));
+
+railToggle?.addEventListener("click", () => {
+  const collapsed = rail.classList.toggle("is-collapsed");
+  railToggle.setAttribute("aria-expanded", String(!collapsed));
+  railToggleMark.textContent = collapsed ? "☰" : "✕";
+  railToggleLabel.textContent = collapsed ? "Show transcript" : "Hide transcript";
+});
 
 form?.addEventListener("submit", (event) => {
   event.preventDefault();
@@ -151,6 +174,13 @@ function showView(view) {
   room.classList.toggle("is-play", view === "play");
 }
 
+/** Tag an element with its speaker's accent slot. Unknown names stay neutral. */
+function paint(element, name) {
+  const slot = accents.get(name);
+  if (slot) element.dataset.player = String(slot);
+  return element;
+}
+
 function setReady(on) {
   start.disabled = !on;
   sample.disabled = !on;
@@ -165,8 +195,14 @@ function resetTable() {
   currentGame = "";
   lastVerdict = null;
   lastScore = null;
+  accents.clear();
   for (const seat of table.querySelectorAll(".seat")) seat.remove();
   log.replaceChildren();
+  legend.replaceChildren();
+  rail.classList.remove("is-collapsed");
+  railToggle.setAttribute("aria-expanded", "true");
+  railToggleMark.textContent = "✕";
+  railToggleLabel.textContent = "Hide transcript";
   title.textContent = "";
   premise.textContent = "";
   sceneTitle.textContent = "";
@@ -213,11 +249,14 @@ function fillInspect(preview) {
   inspectQuestion.textContent = preview.question ?? "";
   inspectTextbook.textContent = preview.textbook ?? "";
   inspectWho.replaceChildren();
-  for (const person of preview.who ?? []) {
+  // preview.who comes from cast.players in seating order, so index maps to the
+  // same accent the seat will get.
+  (preview.who ?? []).forEach((person, index) => {
     const item = document.createElement("li");
+    item.dataset.player = String((index % PALETTE) + 1);
     item.textContent = `${person.name} — ${person.role}`;
     inspectWho.append(item);
-  }
+  });
   inspectPayoffs.replaceChildren();
   if (preview.matrix) inspectPayoffs.append(renderMatrix(preview.matrix));
   if (preview.congestion) inspectPayoffs.append(renderCongestion(preview.congestion));
@@ -418,10 +457,14 @@ function showCast(event) {
   premise.textContent = event.premise;
   sceneTitle.textContent = event.title;
   sceneQ.textContent = event.question ?? "";
+  accents.clear();
+  legend.replaceChildren();
   event.players.forEach((player, index) => {
+    accents.set(player.name, (index % PALETTE) + 1);
     const seat = document.createElement("div");
     seat.className = "seat";
     seat.dataset.name = player.name;
+    paint(seat, player.name);
     const angle = ((index / event.players.length) * 360 - 90) * (Math.PI / 180);
     const x = 50 + Math.cos(angle) * 46;
     seat.style.left = `${x}%`;
@@ -430,6 +473,12 @@ function showCast(event) {
     seat.innerHTML = `<span class="mark">${escape(player.name.slice(0, 1))}</span><small>${escape(player.name)}</small><span class="dots" aria-hidden="true">…</span><div class="bubble hidden"><strong></strong><p></p></div>`;
     table.append(seat);
     requestAnimationFrame(() => seat.classList.add("on"));
+
+    const chip = document.createElement("li");
+    chip.textContent = player.name;
+    chip.title = player.role ?? "";
+    paint(chip, player.name);
+    legend.append(chip);
   });
 }
 
@@ -454,6 +503,7 @@ function say(name, text) {
     bubble.classList.remove("hidden");
   }
   const item = document.createElement("li");
+  paint(item, name);
   item.innerHTML = `<strong>${escape(name)}</strong><p>${escape(text)}</p>`;
   log.append(item);
   item.scrollIntoView({ block: "nearest" });
@@ -468,6 +518,7 @@ function showFreeEnd(event) {
   freeTally.replaceChildren();
   for (const row of event.tally ?? []) {
     const item = document.createElement("li");
+    paint(item, row.name);
     item.textContent = `${row.name} — ${row.action}`;
     freeTally.append(item);
   }
@@ -490,6 +541,7 @@ function showResults(event, score) {
   const people = score?.people ?? event.tally ?? [];
   for (const row of people) {
     const item = document.createElement("li");
+    paint(item, row.name);
     const utility = row.utility == null ? "" : ` — ${row.utility}`;
     item.textContent = `${row.name} — ${row.action}${utility}`;
     tally.append(item);

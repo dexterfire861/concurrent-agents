@@ -1,10 +1,75 @@
+/* Design tokens follow shadcn/ui's variable contract (background/foreground pairs,
+   a single --radius the scale derives from) warmed toward this room's palette.
+   Legacy --ink/--mute/--room/--lamp names are kept as aliases. */
 :root {
-  --ink: #f3e6d4;
-  --mute: #c4b39a;
-  --room: #100c09;
-  --lamp: #e8a04a;
-  --seat: #1c1611;
-  --line: rgba(243, 230, 212, 0.12);
+  --background: #0c0a08;
+  --foreground: #f4ece0;
+  --card: #17120d;
+  --card-foreground: #f4ece0;
+  --popover: #14100b;
+  --popover-foreground: #f4ece0;
+  --primary: #e8a04a;
+  --primary-foreground: #1a1108;
+  --secondary: #241d15;
+  --secondary-foreground: #f4ece0;
+  --muted: #1d1710;
+  --muted-foreground: #a99a86;
+  --accent: #2a2118;
+  --accent-foreground: #f8f1e6;
+  --destructive: #e5484d;
+  --border: rgba(244, 236, 224, 0.11);
+  --input: rgba(244, 236, 224, 0.16);
+  --ring: #e8a04a;
+
+  --radius: 0.625rem;
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+
+  --shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.36);
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.4), 0 1px 2px rgba(0, 0, 0, 0.3);
+  --shadow-lg: 0 18px 44px rgba(0, 0, 0, 0.5);
+  --shadow-xl: 0 26px 64px rgba(0, 0, 0, 0.58);
+
+  /* One accent per seat, in seating order. Hues are spaced far apart and held at
+     a similar lightness so no speaker reads as louder than another. */
+  --p1: #f0a950;
+  --p2: #7cc4e8;
+  --p3: #8fd694;
+  --p4: #ea8f9c;
+  --p5: #b9a0ef;
+  --p6: #62d3c1;
+
+  --font-sans: "Geist", "Inter", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-display: "Fraunces", "Iowan Old Style", Georgia, serif;
+  --font-mono: "Geist Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+
+  --ink: var(--foreground);
+  --mute: var(--muted-foreground);
+  --room: var(--background);
+  --lamp: var(--primary);
+  --seat: var(--secondary);
+  --line: var(--border);
+}
+
+[data-player="1"] {
+  --player: var(--p1);
+}
+[data-player="2"] {
+  --player: var(--p2);
+}
+[data-player="3"] {
+  --player: var(--p3);
+}
+[data-player="4"] {
+  --player: var(--p4);
+}
+[data-player="5"] {
+  --player: var(--p5);
+}
+[data-player="6"] {
+  --player: var(--p6);
 }
 
 * {
@@ -15,15 +80,40 @@ html,
 body {
   margin: 0;
   min-height: 100%;
-  background: var(--room);
-  color: var(--ink);
-  font-family: "Source Sans 3", sans-serif;
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-sans);
+  font-feature-settings: "cv11", "ss01";
+  font-variation-settings: normal;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
 }
 
 body {
   background:
-    radial-gradient(ellipse at 50% 28%, rgba(232, 160, 74, 0.18), transparent 46%),
-    radial-gradient(ellipse at 50% 120%, #000 0%, var(--room) 55%);
+    radial-gradient(ellipse 60% 42% at 50% 26%, rgba(232, 160, 74, 0.16), transparent 100%),
+    radial-gradient(ellipse at 50% 118%, #000 0%, var(--background) 58%);
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.hidden {
+  display: none !important;
+}
+
+:focus-visible {
+  outline: 2px solid color-mix(in srgb, var(--ring) 72%, transparent);
+  outline-offset: 2px;
 }
 
 .room {
@@ -37,77 +127,228 @@ body {
   overflow: hidden;
 }
 
+/* Top bar ---------------------------------------------------------------- */
+
 .mast {
   display: flex;
   justify-content: space-between;
-  align-items: baseline;
-  padding: 1.1rem 1.6rem 0;
+  align-items: center;
+  gap: 1rem;
+  padding: 0.85rem 1.5rem;
+  border-bottom: 1px solid var(--border);
+  background: linear-gradient(to bottom, rgba(23, 18, 13, 0.72), transparent);
 }
 
 .brand {
   margin: 0;
-  font-family: Fraunces, serif;
-  font-size: 1.35rem;
-  letter-spacing: 0.02em;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-family: var(--font-display);
+  font-size: 1.3rem;
+  font-weight: 620;
+  letter-spacing: -0.01em;
 }
 
+.brand::before {
+  content: "";
+  width: 0.5rem;
+  height: 0.5rem;
+  border-radius: 50%;
+  background: var(--primary);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--primary) 22%, transparent);
+}
+
+/* Status readout, styled as a shadcn Badge with a live dot. */
 .clock {
   margin: 0;
-  color: var(--mute);
-  font-size: 0.85rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.42rem;
+  padding: 0.22rem 0.6rem 0.24rem;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--card) 80%, transparent);
+  color: var(--muted-foreground);
+  font-size: 0.75rem;
+  font-weight: 500;
+  letter-spacing: 0.005em;
+  white-space: nowrap;
 }
+
+.clock::before {
+  content: "";
+  width: 0.4rem;
+  height: 0.4rem;
+  border-radius: 50%;
+  background: var(--primary);
+  animation: pulse 2.4s ease-in-out infinite;
+}
+
+/* Buttons — shadcn Button variants: default, .ghost, .outline ------------- */
+
+button {
+  appearance: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  height: 2.25rem;
+  padding: 0 1rem;
+  border: 1px solid transparent;
+  border-radius: var(--radius-md);
+  background: var(--primary);
+  color: var(--primary-foreground);
+  box-shadow: var(--shadow-xs);
+  font-family: var(--font-sans);
+  font-size: 0.875rem;
+  font-weight: 550;
+  line-height: 1;
+  letter-spacing: -0.004em;
+  white-space: nowrap;
+  cursor: pointer;
+  transition:
+    background-color 0.16s ease,
+    border-color 0.16s ease,
+    color 0.16s ease,
+    box-shadow 0.16s ease,
+    transform 0.12s ease;
+}
+
+button:hover {
+  background: color-mix(in srgb, var(--primary) 90%, #fff);
+}
+
+button:active {
+  transform: translateY(0.5px);
+}
+
+button.ghost {
+  background: transparent;
+  color: var(--muted-foreground);
+  box-shadow: none;
+}
+
+button.ghost:hover {
+  background: var(--accent);
+  color: var(--accent-foreground);
+}
+
+button.outline {
+  background: transparent;
+  border-color: var(--input);
+  color: var(--foreground);
+}
+
+button.outline:hover {
+  background: var(--accent);
+  color: var(--accent-foreground);
+}
+
+button:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.icon-btn {
+  height: 1.75rem;
+  width: 1.75rem;
+  padding: 0;
+  flex: 0 0 auto;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--muted-foreground);
+  box-shadow: none;
+  font-size: 0.8rem;
+}
+
+.icon-btn:hover {
+  background: var(--accent);
+  color: var(--accent-foreground);
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  justify-content: center;
+  margin-top: 1.1rem;
+}
+
+/* Stage: the table is centered in the viewport and stays put when the
+   transcript appears, because the transcript floats above it. */
 
 .stage {
-  display: grid;
-  grid-template-columns: 1fr minmax(16rem, 22rem);
-  gap: 1rem;
-  align-items: center;
-  padding: 0.5rem 1.4rem 1.4rem;
-}
-
-.room.is-play .stage {
+  position: relative;
   min-height: 0;
-  align-items: start;
+  padding: 0 1.5rem 1.5rem;
 }
 
 .table-wrap {
-  min-height: calc(100svh - 8rem);
+  min-height: calc(100svh - 7.5rem);
   display: grid;
   place-items: center;
   align-content: center;
-  gap: 1.2rem;
-  overflow: visible;
-  padding: 2.5rem 6.5rem;
+  gap: 1.25rem;
+  padding: 1rem 0;
+}
+
+/* In play the known-games card is gone, so the table is the only child and
+   lands dead centre in the viewport. The transcript floats and never moves it. */
+.room.is-play .table-wrap {
+  min-height: calc(100svh - 5rem);
+  padding: 0;
+}
+
+.room.is-play .table {
+  width: min(64vmin, 34rem);
 }
 
 .table {
   position: relative;
-  width: min(72vmin, 40rem);
+  width: min(56vmin, 30rem);
   aspect-ratio: 1;
   border-radius: 50%;
+  background: #2a2118;
   box-shadow:
-    0 0 0 0.7rem #2a2118,
-    0 28px 80px rgba(0, 0, 0, 0.55);
+    0 0 0 0.55rem #2f251a,
+    0 0 0 0.62rem rgba(255, 214, 160, 0.08),
+    0 30px 84px rgba(0, 0, 0, 0.6);
 }
 
+/* Lamp highlight up top, then a dark pool at dead centre so whatever sits in
+   .center stays legible against the felt. */
 .felt {
   position: absolute;
   inset: 0;
   border-radius: 50%;
+  overflow: hidden;
   background:
-    radial-gradient(circle at 50% 36%, rgba(255, 226, 176, 0.28), transparent 40%),
-    repeating-radial-gradient(circle at 50% 50%, #8a5a32 0 1px, #6b4220 3px, #4a2d14 7px),
-    url("https://images.unsplash.com/photo-1546484396-fb3fc6f95f98?auto=format&fit=crop&w=1600&q=70")
-      center / cover;
-  filter: saturate(0.9) brightness(0.88);
+    radial-gradient(circle at 50% 50%, rgba(6, 5, 3, 0.82) 0%, rgba(6, 5, 3, 0.42) 30%, transparent 58%),
+    radial-gradient(circle at 50% 30%, rgba(255, 231, 190, 0.2), transparent 50%),
+    radial-gradient(circle at 50% 50%, #6d4a2a 0%, #533519 58%, #38220f 100%);
+  box-shadow: inset 0 0 4rem rgba(0, 0, 0, 0.62);
+}
+
+/* Photographic grain, kept faint so the felt reads as texture not stock art. */
+.felt::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: url("https://images.unsplash.com/photo-1546484396-fb3fc6f95f98?auto=format&fit=crop&w=1200&q=60")
+    center / cover;
+  mix-blend-mode: soft-light;
+  opacity: 0.22;
 }
 
 .center {
   position: absolute;
-  inset: 22%;
+  inset: 21%;
   display: grid;
   place-items: center;
   text-align: center;
+  z-index: 2;
 }
 
 .place,
@@ -118,114 +359,121 @@ body {
 .place label,
 .kicker {
   display: block;
-  margin: 0 0 0.55rem;
-  font-size: 0.72rem;
-  letter-spacing: 0.16em;
+  margin: 0 0 0.5rem;
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.14em;
   text-transform: uppercase;
-  color: var(--mute);
+  color: var(--muted-foreground);
 }
 
 .picked {
-  margin: -0.2rem 0 0.5rem;
-  font-family: Fraunces, serif;
+  margin: -0.15rem 0 0.5rem;
+  font-family: var(--font-display);
   font-size: 0.95rem;
-  color: var(--ink);
+  color: var(--foreground);
 }
 
+/* shadcn Textarea */
 textarea {
   width: 100%;
   resize: vertical;
-  border: 0;
-  border-bottom: 1px solid var(--line);
-  background: transparent;
-  color: var(--ink);
-  font: inherit;
-  line-height: 1.45;
-  padding: 0.2rem 0 0.6rem;
+  min-height: 5.5rem;
+  padding: 0.55rem 0.7rem;
+  border: 1px solid var(--input);
+  border-radius: var(--radius-md);
+  background: rgba(12, 10, 8, 0.5);
+  color: var(--foreground);
+  box-shadow: var(--shadow-xs);
+  font-family: var(--font-sans);
+  font-size: 0.875rem;
+  line-height: 1.5;
+  transition:
+    border-color 0.16s ease,
+    box-shadow 0.16s ease;
 }
 
-textarea:focus {
+textarea::placeholder {
+  color: color-mix(in srgb, var(--muted-foreground) 76%, transparent);
+}
+
+textarea:focus-visible {
   outline: none;
-  border-bottom-color: var(--lamp);
+  border-color: color-mix(in srgb, var(--ring) 60%, transparent);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--ring) 22%, transparent);
 }
 
-.actions {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.7rem;
-  justify-content: center;
-  margin-top: 1rem;
-}
+/* Known games — a shadcn Card with selectable rows. */
 
 .known {
-  width: min(36rem, 92vw);
+  width: min(34rem, 92vw);
+  padding: 0.9rem 0.9rem 0.75rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-xl);
+  background: color-mix(in srgb, var(--card) 74%, transparent);
+  backdrop-filter: blur(10px);
+  box-shadow: var(--shadow-lg);
   text-align: left;
+}
+
+.known .kicker {
+  padding: 0 0.35rem;
 }
 
 .games {
   list-style: none;
   margin: 0;
   padding: 0;
+  display: grid;
+  gap: 0.15rem;
 }
 
 .games li {
-  margin: 0.45rem 0 0;
+  margin: 0;
 }
 
 .games button {
-  background: none;
-  color: var(--ink);
-  padding: 0;
+  display: block;
+  width: 100%;
+  height: auto;
+  padding: 0.5rem 0.6rem;
+  border-radius: var(--radius-md);
+  background: transparent;
+  color: var(--foreground);
+  box-shadow: none;
   text-align: left;
-  font-weight: 400;
+  white-space: normal;
+  font-weight: 550;
 }
 
 .games button:hover {
-  color: var(--lamp);
+  background: var(--accent);
+  color: var(--accent-foreground);
 }
 
 .games small {
   display: block;
-  color: var(--mute);
-  font-size: 0.8rem;
+  margin-top: 0.16rem;
+  color: var(--muted-foreground);
+  font-size: 0.775rem;
   font-weight: 400;
+  line-height: 1.4;
 }
 
-button {
-  appearance: none;
-  border: 0;
-  background: var(--lamp);
-  color: #1a1108;
-  font: 560 0.95rem/1 "Source Sans 3", sans-serif;
-  padding: 0.55rem 0.95rem;
-  cursor: pointer;
-}
-
-button.ghost {
-  background: transparent;
-  color: var(--mute);
-  padding-left: 0;
-  padding-right: 0;
-}
-
-button:disabled {
-  opacity: 0.45;
-  cursor: wait;
-}
+/* Seats ------------------------------------------------------------------ */
 
 .seat {
   position: absolute;
-  width: 4.4rem;
-  margin-left: -2.2rem;
-  margin-top: -2.2rem;
+  width: 4.6rem;
+  margin-left: -2.3rem;
+  margin-top: -2.3rem;
   text-align: center;
   opacity: 0;
   transform: translateY(8px);
   z-index: 1;
   transition:
     opacity 0.5s ease,
-    transform 0.5s ease,
-    filter 0.3s ease;
+    transform 0.5s ease;
 }
 
 .seat.on {
@@ -237,21 +485,46 @@ button:disabled {
   z-index: 3;
 }
 
+.mark {
+  width: 2.6rem;
+  height: 2.6rem;
+  margin: 0 auto 0.35rem;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  background: color-mix(in srgb, var(--player, var(--primary)) 16%, #191309);
+  color: var(--player, var(--foreground));
+  box-shadow:
+    inset 0 0 0 1px color-mix(in srgb, var(--player, var(--border)) 44%, transparent),
+    var(--shadow-sm);
+  font-family: var(--font-display);
+  font-size: 1.05rem;
+  font-weight: 620;
+  transition: box-shadow 0.25s ease;
+}
+
 .seat.talking .mark {
-  box-shadow: 0 0 0 3px var(--lamp);
+  box-shadow:
+    inset 0 0 0 1px color-mix(in srgb, var(--player, var(--primary)) 60%, transparent),
+    0 0 0 3px color-mix(in srgb, var(--player, var(--primary)) 70%, transparent),
+    0 0 22px color-mix(in srgb, var(--player, var(--primary)) 40%, transparent);
 }
 
 .seat.thinking .mark {
   animation: think 1.6s ease-in-out infinite;
 }
 
-.seat.thinking .bubble {
-  opacity: 0.4;
+.seat small {
+  display: block;
+  color: color-mix(in srgb, var(--player, var(--muted-foreground)) 82%, var(--foreground));
+  font-size: 0.755rem;
+  font-weight: 550;
+  letter-spacing: -0.002em;
 }
 
 .dots {
   display: none;
-  color: var(--mute);
+  color: var(--muted-foreground);
   letter-spacing: 0.18em;
   font-size: 0.95rem;
   line-height: 1;
@@ -261,15 +534,30 @@ button:disabled {
   display: block;
 }
 
+.seat.thinking .bubble {
+  opacity: 0.4;
+}
+
+/* shadcn Popover, pinned to a seat. */
 .bubble {
   position: absolute;
   top: -0.15rem;
-  width: 11.2rem;
-  padding: 0.35rem 0.5rem 0.4rem;
-  border-radius: 0.35rem;
-  background: rgba(16, 12, 9, 0.88);
-  box-shadow: 0 0 0 1px var(--line);
+  width: 10.5rem;
+  padding: 0.4rem 0.55rem 0.45rem;
+  border: 1px solid var(--border);
+  border-left: 2px solid var(--player, var(--primary));
+  border-radius: var(--radius-md);
+  background: color-mix(in srgb, var(--popover) 92%, transparent);
+  backdrop-filter: blur(6px);
+  box-shadow: var(--shadow-lg);
   text-align: left;
+  /* Past lines linger but recede, so the current speaker is unmistakable. */
+  opacity: 0.5;
+  transition: opacity 0.3s ease;
+}
+
+.seat.talking .bubble {
+  opacity: 1;
 }
 
 .seat[data-side="left"] .bubble {
@@ -282,144 +570,310 @@ button:disabled {
 
 .bubble strong {
   display: block;
+  color: var(--player, var(--primary));
   font-size: 0.68rem;
-  letter-spacing: 0.04em;
-  color: var(--lamp);
+  font-weight: 600;
+  letter-spacing: 0.02em;
 }
 
 .bubble p {
   margin: 0.15rem 0 0;
-  font-size: 0.82rem;
-  line-height: 1.3;
+  font-size: 0.8rem;
+  line-height: 1.35;
   display: -webkit-box;
   -webkit-line-clamp: 4;
   -webkit-box-orient: vertical;
   overflow: hidden;
 }
 
-.mark {
-  width: 2.55rem;
-  height: 2.55rem;
-  margin: 0 auto 0.35rem;
-  border-radius: 50%;
-  background: var(--seat);
-  color: var(--ink);
-  display: grid;
-  place-items: center;
-  font-family: Fraunces, serif;
-  font-size: 1rem;
-}
-
-.seat small {
-  display: block;
-  color: var(--mute);
-  font-size: 0.75rem;
-}
-
 .scene-title {
-  margin: 0 0 0.45rem;
-  font-family: Fraunces, serif;
+  margin: 0 0 0.4rem;
+  font-family: var(--font-display);
   font-size: clamp(1.05rem, 2.1vw, 1.4rem);
+  font-weight: 620;
   line-height: 1.2;
+  letter-spacing: -0.012em;
 }
 
 .scene-q {
   margin: 0;
-  color: var(--mute);
-  font-size: 0.95rem;
-  line-height: 1.4;
+  color: var(--muted-foreground);
+  font-size: 0.9rem;
+  line-height: 1.45;
 }
 
-.hidden {
+/* Transcript — a floating shadcn Card so the table stays centered. */
+
+.rail {
+  position: fixed;
+  top: 4.25rem;
+  right: 1.25rem;
+  bottom: 1.25rem;
+  width: min(21rem, 30vw);
+  z-index: 20;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  padding: 0.85rem 0.85rem 0.7rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-xl);
+  background: color-mix(in srgb, var(--card) 84%, transparent);
+  backdrop-filter: blur(16px) saturate(1.15);
+  box-shadow: var(--shadow-xl);
+}
+
+/* .rail sets display:flex, which would otherwise beat the UA [hidden] rule. */
+.rail[hidden] {
   display: none;
 }
 
-.rail {
-  align-self: stretch;
-  overflow-x: hidden;
-  overflow-y: auto;
-  max-height: calc(100svh - 6rem);
-  padding: 1.4rem 0.2rem 0;
-  border-left: 1px solid var(--line);
-  padding-left: 1.2rem;
+.rail-head {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+}
+
+.rail-head-text {
+  min-width: 0;
+  flex: 1;
+}
+
+.rail .kicker {
+  margin-bottom: 0.3rem;
 }
 
 .rail .premise {
-  margin: 0 0 1rem;
-  color: var(--mute);
-  font-size: 0.95rem;
+  margin: 0 0 0.6rem;
+  color: var(--muted-foreground);
+  font-size: 0.8rem;
+  line-height: 1.45;
+}
+
+.rail-body {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  flex: 1;
+}
+
+.rail.is-collapsed {
+  bottom: auto;
+  width: auto;
+  padding: 0.45rem;
+}
+
+.rail.is-collapsed .rail-head-text,
+.rail.is-collapsed .rail-body {
+  display: none;
+}
+
+/* Speaker legend: the key that makes the colours readable as identity. */
+.legend {
+  list-style: none;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.3rem;
+  margin: 0 0 0.7rem;
+  padding: 0 0 0.7rem;
+  border-bottom: 1px solid var(--border);
+}
+
+.legend:empty {
+  display: none;
+}
+
+.legend li {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.34rem;
+  padding: 0.14rem 0.45rem 0.16rem;
+  border: 1px solid color-mix(in srgb, var(--player, var(--border)) 34%, transparent);
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--player, var(--primary)) 12%, transparent);
+  color: var(--player, var(--primary));
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.004em;
+}
+
+.legend li::before {
+  content: "";
+  width: 0.4rem;
+  height: 0.4rem;
+  border-radius: 50%;
+  background: currentColor;
 }
 
 .log {
   list-style: none;
   margin: 0;
-  padding: 0;
+  padding: 0 0.15rem 0 0;
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: var(--input) transparent;
+}
+
+.log::-webkit-scrollbar {
+  width: 6px;
+}
+
+.log::-webkit-scrollbar-thumb {
+  background: var(--input);
+  border-radius: 999px;
 }
 
 .log li {
-  margin: 0 0 0.9rem;
+  margin: 0 0 0.45rem;
+  padding: 0.5rem 0.6rem 0.55rem;
+  border: 1px solid var(--border);
+  border-left: 2px solid var(--player, var(--primary));
+  border-radius: var(--radius-md);
+  background: color-mix(in srgb, var(--player, var(--primary)) 7%, transparent);
   opacity: 0;
   transform: translateY(6px);
   animation: rise 0.45s ease forwards;
 }
 
 .log strong {
-  display: block;
-  font-size: 0.78rem;
-  letter-spacing: 0.04em;
-  color: var(--lamp);
+  display: inline-flex;
+  align-items: center;
+  gap: 0.36rem;
+  color: var(--player, var(--primary));
+  font-size: 0.735rem;
+  font-weight: 600;
+  letter-spacing: 0.012em;
+}
+
+.log strong::before {
+  content: "";
+  width: 0.42rem;
+  height: 0.42rem;
+  border-radius: 50%;
+  background: currentColor;
 }
 
 .log p {
-  margin: 0.2rem 0 0;
+  margin: 0.22rem 0 0;
+  font-size: 0.845rem;
+  line-height: 1.5;
 }
 
+.play-end {
+  flex: 0 0 auto;
+  margin-top: 0.7rem;
+  padding-top: 0.7rem;
+  border-top: 1px solid var(--border);
+  max-height: 55vh;
+  overflow-y: auto;
+}
+
+.play-end > button {
+  width: 100%;
+  margin-bottom: 0.45rem;
+}
+
+/* Panels: inspect + results, centered shadcn Cards ----------------------- */
+
 .panel {
-  padding: 1.2rem 1.6rem 2.4rem;
-  max-width: 42rem;
+  width: min(42rem, calc(100vw - 3rem));
+  margin: 1.75rem auto 2.5rem;
+  padding: 1.5rem 1.6rem 1.6rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-xl);
+  background: color-mix(in srgb, var(--card) 78%, transparent);
+  backdrop-filter: blur(10px);
+  box-shadow: var(--shadow-lg);
 }
 
 .panel-title {
-  margin: 0 0 0.55rem;
-  font-family: Fraunces, serif;
+  margin: 0 0 0.5rem;
+  font-family: var(--font-display);
   font-size: clamp(1.4rem, 3vw, 2rem);
-  line-height: 1.2;
+  font-weight: 620;
+  line-height: 1.15;
+  letter-spacing: -0.018em;
 }
 
 .panel-lead {
-  margin: 0 0 0.7rem;
-  color: var(--mute);
-  line-height: 1.5;
+  margin: 0 0 0.6rem;
+  color: var(--muted-foreground);
+  line-height: 1.55;
+  font-size: 0.925rem;
 }
 
 .who {
   list-style: none;
   margin: 0 0 1.1rem;
   padding: 0;
+  display: grid;
+  gap: 0.2rem;
 }
 
 .who li {
-  margin: 0.2rem 0;
-  color: var(--mute);
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  color: var(--muted-foreground);
+  font-size: 0.875rem;
 }
 
-.matrix {
+.who li::before {
+  content: "";
+  flex: 0 0 auto;
+  width: 0.45rem;
+  height: 0.45rem;
+  border-radius: 50%;
+  background: var(--player, var(--muted-foreground));
+}
+
+/* shadcn Table */
+.matrix,
+.crowd table {
   width: 100%;
   border-collapse: collapse;
-  margin: 0.4rem 0 1.1rem;
+  margin: 0.5rem 0 1.1rem;
+  font-size: 0.85rem;
+}
+
+.matrix th,
+.matrix td,
+.crowd th,
+.crowd td {
+  padding: 0.5rem 0.7rem;
+  border-bottom: 1px solid var(--border);
+  font-variant-numeric: tabular-nums;
+  font-family: var(--font-mono);
+  font-weight: 400;
+}
+
+.matrix th,
+.crowd th {
+  color: var(--muted-foreground);
+  font-family: var(--font-sans);
+  font-weight: 600;
+  font-size: 0.775rem;
+  letter-spacing: 0.01em;
+}
+
+.matrix thead th,
+.crowd thead th {
+  border-bottom-color: var(--input);
 }
 
 .matrix th,
 .matrix td {
-  border: 1px solid var(--line);
-  padding: 0.5rem 0.7rem;
   text-align: center;
-  font-variant-numeric: tabular-nums;
 }
 
-.matrix th {
-  color: var(--mute);
-  font-weight: 560;
+.matrix tbody th {
+  text-align: left;
+}
+
+.matrix tbody tr:hover,
+.crowd tbody tr:hover {
+  background: color-mix(in srgb, var(--accent) 55%, transparent);
 }
 
 .crowd {
@@ -427,55 +881,50 @@ button:disabled {
 }
 
 .crowd p {
-  margin: 0 0 0.4rem;
-}
-
-.crowd table {
-  width: 100%;
-  border-collapse: collapse;
-  margin-top: 0.5rem;
+  margin: 0 0 0.3rem;
+  color: var(--muted-foreground);
+  font-size: 0.85rem;
 }
 
 .crowd th,
 .crowd td {
-  border: 1px solid var(--line);
-  padding: 0.4rem 0.6rem;
   text-align: left;
-  font-variant-numeric: tabular-nums;
 }
 
 .textbook-line {
   margin: 0 0 1.2rem;
-  line-height: 1.5;
+  line-height: 1.55;
+  font-size: 0.925rem;
 }
 
-.play-end {
-  margin-top: 1.2rem;
-  padding-top: 1rem;
-  border-top: 1px solid var(--line);
-}
+/* Verdict --------------------------------------------------------------- */
 
-.play-end > button {
-  margin-bottom: 0.8rem;
-}
-
-.free-end .flag {
-  font-size: 1.05rem;
-}
-
+/* shadcn Badge */
 .flag {
-  margin: 0 0 0.35rem;
-  font-family: Fraunces, serif;
-  font-size: 1.35rem;
-  letter-spacing: 0.08em;
-  color: var(--lamp);
+  display: inline-flex;
+  align-items: center;
+  margin: 0 0 0.5rem;
+  padding: 0.2rem 0.6rem 0.22rem;
+  border: 1px solid color-mix(in srgb, var(--primary) 34%, transparent);
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--primary) 13%, transparent);
+  color: var(--primary);
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+}
+
+.flag:empty {
+  display: none;
 }
 
 .outcome {
   margin: 0 0 0.7rem;
-  font-family: Fraunces, serif;
-  font-size: 1.2rem;
-  line-height: 1.3;
+  font-family: var(--font-display);
+  font-size: 1.15rem;
+  font-weight: 500;
+  line-height: 1.35;
+  letter-spacing: -0.01em;
   max-width: 42rem;
 }
 
@@ -483,40 +932,79 @@ button:disabled {
   list-style: none;
   margin: 0 0 0.9rem;
   padding: 0;
-  color: var(--mute);
+  display: grid;
+  gap: 0.22rem;
 }
 
 .tally li {
-  margin: 0.12rem 0;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  color: var(--muted-foreground);
+  font-size: 0.865rem;
+}
+
+.tally li::before {
+  content: "";
+  flex: 0 0 auto;
+  width: 0.42rem;
+  height: 0.42rem;
+  border-radius: 50%;
+  background: var(--player, var(--muted-foreground));
 }
 
 .reading {
   max-width: 42rem;
   margin: 0 0 0.9rem;
-  line-height: 1.5;
+  line-height: 1.55;
+  font-size: 0.925rem;
 }
 
 .textbook {
   max-width: 42rem;
   margin: 0 0 1rem;
+  padding: 0.85rem 0.9rem 0.7rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  background: color-mix(in srgb, var(--muted) 55%, transparent);
 }
 
 .textbook p {
-  margin: 0 0 0.45rem;
+  margin: 0 0 0.4rem;
+  font-size: 0.875rem;
+  line-height: 1.5;
 }
 
 .versus {
-  color: var(--lamp);
+  color: var(--primary);
+  font-weight: 550;
 }
 
 .notes {
   max-width: 42rem;
-  font-size: 1.05rem;
-  line-height: 1.55;
+  font-size: 0.95rem;
+  line-height: 1.6;
 }
 
 .notes p {
-  margin: 0 0 0.8rem;
+  margin: 0 0 0.75rem;
+}
+
+.free-end {
+  margin-top: 0.2rem;
+}
+
+.free-end .flag {
+  font-size: 0.68rem;
+}
+
+.free-end .outcome {
+  font-size: 1rem;
+}
+
+.free-end .reading,
+.free-end .notes {
+  font-size: 0.85rem;
 }
 
 @keyframes rise {
@@ -528,24 +1016,69 @@ button:disabled {
 
 @keyframes think {
   50% {
-    opacity: 0.45;
+    opacity: 0.5;
+  }
+}
+
+@keyframes pulse {
+  50% {
+    opacity: 0.35;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+
+  .log li {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* Below this width the floating transcript would crowd the seats, so the
+   table gives back some room rather than sliding off-centre. */
+@media (max-width: 1180px) {
+  .room.is-play .table {
+    width: min(52vmin, 27rem);
+  }
+
+  .bubble {
+    width: 9rem;
   }
 }
 
 @media (max-width: 860px) {
   .stage {
-    grid-template-columns: 1fr;
-    padding-bottom: 0;
+    padding: 0 1rem 1rem;
   }
 
-  .table-wrap {
-    min-height: 70svh;
+  .table-wrap,
+  .room.is-play .table-wrap {
+    min-height: 62svh;
   }
 
+  .room.is-play .table {
+    width: min(74vmin, 24rem);
+  }
+
+  /* Transcript becomes a bottom sheet. */
   .rail {
-    border-left: 0;
-    border-top: 1px solid var(--line);
-    padding: 1rem 0 0;
-    max-height: 40svh;
+    top: auto;
+    left: 0.75rem;
+    right: 0.75rem;
+    bottom: 0.75rem;
+    width: auto;
+    max-height: 46svh;
+  }
+
+  .rail.is-collapsed {
+    left: auto;
+    top: auto;
   }
 }
