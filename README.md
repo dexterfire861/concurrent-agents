@@ -57,6 +57,32 @@ Payoffs and Nash / equilibrium lines come from the YAML spec and the last-round 
 
 Code to read first: [`src/demo/play.ts`](src/demo/play.ts), [`src/demo/games.ts`](src/demo/games.ts), [`public/app.js`](public/app.js).
 
+## Deploying
+
+The [`Dockerfile`](Dockerfile) runs anywhere that hosts a long-lived container. Serverless platforms do not work: a run spawns a child process and holds an SSE stream open for the length of the conversation.
+
+```bash
+docker build -t table .
+docker run --rm -p 7860:7860 --env-file .env table
+```
+
+Set `OPENAI_API_KEY` as a platform secret, never in the image.
+
+A public link spends that key — roughly a dozen model calls per run — so the server refuses runs past a per-visitor allowance and a process-lifetime total:
+
+| Variable | Default | What it caps |
+| --- | --- | --- |
+| `RUNS_PER_IP` | `6` | Runs one visitor may start per window |
+| `IP_WINDOW_MS` | `1800000` | Length of that window |
+| `RUNS_TOTAL` | `300` | Runs for the life of the process |
+| `MAX_CONCURRENT` | `3` | Conversations that may overlap |
+| `HOST` | `127.0.0.1` | Bind address; the image sets `0.0.0.0` |
+| `PORT` | `3847` | Listen port; the image sets `7860` |
+
+The counters live in memory, so a restart clears them. They guard against a stray crawler, not against spend — set a limit on the key too.
+
+Measured in the image under a 512 MB / 0.1 CPU cap, which is what the smaller free tiers give: it boots in about 15 seconds, one conversation takes about 50 seconds and peaks near 75 MB, and three overlapping conversations peak near 285 MB but stretch to about 135 seconds each as they contend for the CPU. Memory is not the binding constraint; CPU is. Lower `MAX_CONCURRENT` to trade refusals for speed.
+
 ## Also in this repo
 
 `src/spec`, `src/eval`, and `configs/` are a closed-form library the table reads. `npm test` checks those fixtures. They are not the UI.

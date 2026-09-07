@@ -1,0 +1,12 @@
+# Keep the build context small. The image only needs src, configs, public and the manifests.
+.git
+node_modules
+.env
+.env.*
+!.env.example
+
+# The 3 MB source CSV is only an input to `npm run situations`; the generated
+# public/situations.json is what the app actually serves.
+data
+scripts
+test

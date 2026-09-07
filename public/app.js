@@ -16,6 +16,7 @@ const title = document.querySelector("#title");
 const premise = document.querySelector("#premise");
 const log = document.querySelector("#log");
 const clock = document.querySelector("#clock");
+const notice = document.querySelector("#notice");
 const again = document.querySelector("#again");
 const games = document.querySelector("#games");
 const inspect = document.querySelector("#inspect");
@@ -340,8 +341,16 @@ function cell(tag, text) {
   return el;
 }
 
+/** Empty text hides the banner. */
+function showNotice(text) {
+  if (!notice) return;
+  notice.textContent = text;
+  notice.classList.toggle("hidden", !text);
+}
+
 async function startRun(body) {
   setReady(false);
+  showNotice("");
   clock.textContent = body.game ? "Sitting the game" : "Casting";
   showView("play");
 
@@ -352,7 +361,16 @@ async function startRun(body) {
   });
 
   if (!response.ok || !response.body) {
-    clock.textContent = "Could not start";
+    let reason = "";
+    try {
+      const failure = await response.json();
+      if (failure && typeof failure.error === "string") reason = failure.error;
+    } catch {
+      /* not JSON — the short label below carries the meaning */
+    }
+    clock.textContent =
+      response.status === 429 ? "Out of runs" : response.status === 409 ? "Table busy" : "Could not start";
+    showNotice(reason);
     setReady(true);
     showView(body.game ? "inspect" : "choose");
     return;

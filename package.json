@@ -22,14 +22,17 @@
   },
   "homepage": "https://github.com/dexterfire861/concurrent-agents#readme",
   "description": "A table of agents. They talk. A frozen spec scores them against the textbook.",
+  "engines": {
+    "node": ">=22"
+  },
   "dependencies": {
     "@mozaik-ai/core": "^4.0.5",
     "dotenv": "^17.4.2",
+    "tsx": "^4.23.13",
     "yaml": "^2.9.0"
   },
   "devDependencies": {
     "@types/node": "^26.4.1",
-    "tsx": "^4.23.13",
     "typescript": "^7.0.2"
   }
 }

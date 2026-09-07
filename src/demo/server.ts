@@ -14,6 +14,8 @@ import { listGames, previewGame } from "./games.js";
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../..");
 const PUBLIC = path.join(ROOT, "public");
 const PORT = Number(process.env.PORT ?? 3847);
+// Loopback locally. A container sets HOST=0.0.0.0 so its proxy can reach us.
+const HOST = process.env.HOST ?? "127.0.0.1";
 
 const TYPES: Record<string, string> = {
   ".html": "text/html; charset=utf-8",
@@ -22,7 +24,52 @@ const TYPES: Record<string, string> = {
   ".svg": "image/svg+xml",
 };
 
-let busy = false;
+/**
+ * Runs may overlap: each conversation is its own child process, so they share
+ * nothing. The ceiling is here because every run holds a Node child and an
+ * open stream, and the work is spent waiting on the model rather than on CPU.
+ */
+const MAX_CONCURRENT = Number(process.env.MAX_CONCURRENT ?? 3);
+
+let running = 0;
+
+/**
+ * A public link spends a real API key: one run is roughly a dozen model calls.
+ * Two ceilings, both overridable by env so a local run is unconstrained:
+ * a per-visitor allowance, and a total for the life of the process.
+ */
+const RUNS_PER_IP = Number(process.env.RUNS_PER_IP ?? 6);
+const IP_WINDOW_MS = Number(process.env.IP_WINDOW_MS ?? 30 * 60 * 1000);
+const RUNS_TOTAL = Number(process.env.RUNS_TOTAL ?? 300);
+
+const hits = new Map<string, number[]>();
+let runsSoFar = 0;
+
+/** Behind the Spaces proxy the socket address is the proxy, not the visitor. */
+function clientIp(req: http.IncomingMessage): string {
+  const forwarded = req.headers["x-forwarded-for"];
+  const first = Array.isArray(forwarded) ? forwarded[0] : forwarded?.split(",")[0];
+  return (first ?? req.socket.remoteAddress ?? "unknown").trim();
+}
+
+/** Returns a reason to refuse, or null to allow. Counts the run when allowed. */
+function refuse(req: http.IncomingMessage): string | null {
+  if (runsSoFar >= RUNS_TOTAL) {
+    return "This demo has used up its run budget. Clone the repo and run it with your own key.";
+  }
+  const ip = clientIp(req);
+  const now = Date.now();
+  const recent = (hits.get(ip) ?? []).filter((at) => now - at < IP_WINDOW_MS);
+  if (recent.length >= RUNS_PER_IP) {
+    const minutes = Math.max(1, Math.ceil((IP_WINDOW_MS - (now - recent[0]!)) / 60000));
+    const runs = `${RUNS_PER_IP} conversation${RUNS_PER_IP === 1 ? "" : "s"}`;
+    return `You have run ${runs}. Try again in ${minutes} minute${minutes === 1 ? "" : "s"}.`;
+  }
+  recent.push(now);
+  hits.set(ip, recent);
+  runsSoFar += 1;
+  return null;
+}
 
 function send(res: http.ServerResponse, status: number, body: string, type = "text/plain"): void {
   res.writeHead(status, { "Content-Type": `${type}; charset=utf-8` });
@@ -56,7 +103,7 @@ function readBody(req: http.IncomingMessage): Promise<string> {
 }
 
 function runConversation(res: http.ServerResponse, payload: string): void {
-  busy = true;
+  running += 1;
   res.writeHead(200, {
     "Content-Type": "text/event-stream; charset=utf-8",
     "Cache-Control": "no-cache, no-transform",
@@ -96,8 +143,12 @@ function runConversation(res: http.ServerResponse, payload: string): void {
     process.stderr.write(chunk);
   });
 
+  // A counter, unlike the boolean this replaced, must not be decremented twice.
+  let settled = false;
   const finish = () => {
-    busy = false;
+    if (settled) return;
+    settled = true;
+    running -= 1;
     if (!res.writableEnded) res.end();
   };
 
@@ -147,8 +198,13 @@ const server = http.createServer(async (req, res) => {
   }
 
   if (req.method === "POST" && url.pathname === "/api/run") {
-    if (busy) {
-      send(res, 409, JSON.stringify({ error: "a conversation is already running" }), "application/json");
+    if (running >= MAX_CONCURRENT) {
+      send(
+        res,
+        409,
+        JSON.stringify({ error: "Every table is busy right now. Try again in a moment." }),
+        "application/json",
+      );
       return;
     }
     let scenario = "";
@@ -161,21 +217,23 @@ const server = http.createServer(async (req, res) => {
       send(res, 400, JSON.stringify({ error: "could not read the situation" }), "application/json");
       return;
     }
-    if (game) {
-      runConversation(res, JSON.stringify({ game }));
-      return;
-    }
-    if (scenario.length < 8) {
+    if (!game && scenario.length < 8) {
       send(res, 400, JSON.stringify({ error: "write a situation first" }), "application/json");
       return;
     }
-    runConversation(res, JSON.stringify({ scenario }));
+    // Only count against the budget once we know we are really going to run.
+    const refusal = refuse(req);
+    if (refusal) {
+      send(res, 429, JSON.stringify({ error: refusal }), "application/json");
+      return;
+    }
+    runConversation(res, JSON.stringify(game ? { game } : { scenario }));
     return;
   }
 
   send(res, 404, "not found");
 });
 
-server.listen(PORT, "127.0.0.1", () => {
-  process.stdout.write(`Table → http://127.0.0.1:${PORT}\n`);
+server.listen(PORT, HOST, () => {
+  process.stdout.write(`Table → http://${HOST === "0.0.0.0" ? "localhost" : HOST}:${PORT}\n`);
 });
