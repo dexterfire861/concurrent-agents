@@ -45,11 +45,16 @@ const RUNS_TOTAL = Number(process.env.RUNS_TOTAL ?? 300);
 const hits = new Map<string, number[]>();
 let runsSoFar = 0;
 
-/** Behind the Spaces proxy the socket address is the proxy, not the visitor. */
+/**
+ * Behind the host's proxy the socket address is the proxy, not the visitor.
+ * Take the last X-Forwarded-For entry: the proxy appends it, while anything to
+ * its left came from the client and can be forged to dodge the per-IP limit.
+ */
 function clientIp(req: http.IncomingMessage): string {
   const forwarded = req.headers["x-forwarded-for"];
-  const first = Array.isArray(forwarded) ? forwarded[0] : forwarded?.split(",")[0];
-  return (first ?? req.socket.remoteAddress ?? "unknown").trim();
+  const joined = Array.isArray(forwarded) ? forwarded.join(",") : forwarded;
+  const last = joined?.split(",").map((part) => part.trim()).filter(Boolean).at(-1);
+  return last ?? req.socket.remoteAddress ?? "unknown";
 }
 
 /** Returns a reason to refuse, or null to allow. Counts the run when allowed. */
@@ -83,7 +88,7 @@ async function file(res: http.ServerResponse, rel: string): Promise<void> {
     return;
   }
   try {
-    await stat(filePath);
+    if (!(await stat(filePath)).isFile()) throw new Error("not a file");
   } catch {
     send(res, 404, "not found");
     return;
@@ -93,10 +98,23 @@ async function file(res: http.ServerResponse, rel: string): Promise<void> {
   createReadStream(filePath).pipe(res);
 }
 
+/** A situation is a paragraph. Anything far past that is spend, not a scene. */
+const MAX_BODY_BYTES = 8 * 1024;
+const MAX_SCENARIO_CHARS = 2000;
+
 function readBody(req: http.IncomingMessage): Promise<string> {
   return new Promise((resolve, reject) => {
     const chunks: Buffer[] = [];
-    req.on("data", (chunk) => chunks.push(chunk as Buffer));
+    let size = 0;
+    req.on("data", (chunk: Buffer) => {
+      size += chunk.length;
+      if (size > MAX_BODY_BYTES) {
+        reject(new Error("body too large"));
+        req.destroy();
+        return;
+      }
+      chunks.push(chunk);
+    });
     req.on("end", () => resolve(Buffer.concat(chunks).toString("utf8")));
     req.on("error", reject);
   });
@@ -170,7 +188,14 @@ function reqOnClose(res: http.ServerResponse, fn: () => void): void {
 }
 
 const server = http.createServer(async (req, res) => {
-  const url = new URL(req.url ?? "/", `http://127.0.0.1:${PORT}`);
+  let url: URL;
+  try {
+    url = new URL(req.url ?? "/", `http://127.0.0.1:${PORT}`);
+  } catch {
+    // A path like "//" is not a valid relative URL and used to crash the process.
+    send(res, 400, "bad request");
+    return;
+  }
 
   if (req.method === "GET" && url.pathname === "/api/games") {
     send(res, 200, JSON.stringify(listGames()), "application/json");
@@ -219,6 +244,15 @@ const server = http.createServer(async (req, res) => {
     }
     if (!game && scenario.length < 8) {
       send(res, 400, JSON.stringify({ error: "write a situation first" }), "application/json");
+      return;
+    }
+    if (scenario.length > MAX_SCENARIO_CHARS) {
+      send(
+        res,
+        400,
+        JSON.stringify({ error: `Keep the situation under ${MAX_SCENARIO_CHARS} characters.` }),
+        "application/json",
+      );
       return;
     }
     // Only count against the budget once we know we are really going to run.
